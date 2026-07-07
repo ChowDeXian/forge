@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "FORGE",
+    "slug": "forge",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#0D0D0D",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.forge.gym"
+    },
+    "android": {
+      "package": "com.forge.gym"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "name": "FORGE",
+      "shortName": "FORGE",
+      "themeColor": "#0D0D0D",
+      "backgroundColor": "#0D0D0D"
+    },
+    "experiments": {
+      "baseUrl": "/forge"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow FORGE to access your videos so you can add exercise demos."
+        }
+      ],
+      "expo-asset",
+      "expo-video"
+    ]
+  }
+}
