@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer, useState } from 'react';
-import { View, Text, ScrollView, Pressable, TextInput, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
 import { Stepper } from '../components';
 import { exerciseById } from '../store';
 import {
@@ -107,7 +107,7 @@ export default function Logger({ ui, state, dispatch }) {
 
   return (
     <View style={s.overlay}>
-      <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
         <View style={s.loggerHead}>
           <View style={s.rowBetween}>
             <Pressable onPress={close}><Text style={s.back}>‹ Minimise</Text></Pressable>
@@ -198,7 +198,7 @@ export default function Logger({ ui, state, dispatch }) {
           <Pressable style={s.btnPrimary} onPress={finish}><Text style={s.btnPrimaryTxt}>Finish Workout</Text></Pressable>
           <Pressable onPress={discard}><Text style={[s.muted, { textAlign: 'center' }]}>Discard workout</Text></Pressable>
         </View>
-      </SafeAreaView>
+      </View>
 
       {showPicker && (
         <ExercisePicker ui={ui} exercises={state.exercises} onPick={addExercise} onClose={() => setShowPicker(false)} />

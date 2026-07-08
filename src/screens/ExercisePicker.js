@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, TextInput, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
 
 export const GROUPS = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core', 'Cardio'];
 
@@ -19,8 +19,8 @@ export default function ExercisePicker({ ui, exercises, title = 'Add Exercise', 
 
   return (
     <View style={s.overlay}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
+      <View style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={s.overlayScreen} keyboardShouldPersistTaps="handled">
           <Pressable onPress={onClose}><Text style={s.back}>‹ Back</Text></Pressable>
           <Text style={[s.h1, { marginBottom: 14 }]}>{title}</Text>
 
@@ -56,7 +56,7 @@ export default function ExercisePicker({ ui, exercises, title = 'Add Exercise', 
             </Pressable>
           ))}
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </View>
   );
 }

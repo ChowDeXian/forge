@@ -1,10 +1,13 @@
 import { StyleSheet } from 'react-native';
 import { MONO } from './theme';
 
-export function makeStyles(t) {
+/* insets = device safe areas (Dynamic Island / home indicator); surfaces run
+   edge-to-edge and each padded region adds the inset it touches. */
+export function makeStyles(t, insets = { top: 0, bottom: 0, left: 0, right: 0 }) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: t.bg },
-    screen: { padding: 20, paddingBottom: 40 },
+    screen: { padding: 20, paddingTop: 20 + insets.top, paddingBottom: 40 },
+    overlayScreen: { padding: 20, paddingTop: 20 + insets.top, paddingBottom: 60 },
     rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
 
     eyebrow: { fontSize: 12, fontWeight: '700', color: t.muted, letterSpacing: 1.4 },
@@ -45,7 +48,7 @@ export function makeStyles(t) {
     rowSub: { color: t.muted, fontSize: 12.5, marginTop: 2 },
     rowEnd: { fontFamily: MONO, color: t.muted, fontWeight: '700', fontSize: 13 },
 
-    nav: { flexDirection: 'row', backgroundColor: t.surface, borderTopWidth: 1, borderTopColor: t.line, paddingTop: 8, paddingBottom: 8 },
+    nav: { flexDirection: 'row', backgroundColor: t.surface, borderTopWidth: 1, borderTopColor: t.line, paddingTop: 8, paddingBottom: 8 + insets.bottom },
     navItem: { flex: 1, alignItems: 'center', gap: 3 },
     navIcon: { fontSize: 20, color: t.muted },
     navLabel: { fontSize: 10.5, fontWeight: '600', color: t.muted },
@@ -57,7 +60,7 @@ export function makeStyles(t) {
 
     /* logger */
     overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: t.bg },
-    loggerHead: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 8 },
+    loggerHead: { paddingHorizontal: 20, paddingTop: 10 + insets.top, paddingBottom: 8 },
     back: { color: t.text, fontWeight: '600', fontSize: 15 },
     bigTimer: { fontFamily: MONO, fontSize: 20, fontWeight: '700', color: t.text },
     restPill: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: t.accentDim, borderWidth: 1, borderColor: t.accent + '55', paddingVertical: 9, paddingHorizontal: 14, borderRadius: 999, marginTop: 12 },
@@ -79,7 +82,7 @@ export function makeStyles(t) {
     check: { width: 42, height: 42, borderRadius: 11, borderWidth: 1, borderColor: t.line, backgroundColor: t.surface2, alignItems: 'center', justifyContent: 'center' },
     addSet: { marginTop: 6, padding: 11, borderRadius: 11, borderWidth: 1, borderColor: t.line, borderStyle: 'dashed', alignItems: 'center' },
     addSetTxt: { color: t.muted, fontWeight: '600', fontSize: 13.5 },
-    finishBar: { padding: 16, paddingBottom: 22, gap: 10 },
+    finishBar: { padding: 16, paddingBottom: 22 + insets.bottom, gap: 10 },
     iconBtn: { width: 30, height: 30, borderRadius: 8, backgroundColor: t.surface2, borderWidth: 1, borderColor: t.line, alignItems: 'center', justifyContent: 'center' },
     iconBtnTxt: { color: t.muted, fontWeight: '700', fontSize: 14 },
 
@@ -122,9 +125,9 @@ export function makeStyles(t) {
 
     /* modal + toast + confirm */
     modalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
-    modal: { backgroundColor: t.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 22, paddingBottom: 34 },
+    modal: { backgroundColor: t.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 22, paddingBottom: 34 + insets.bottom },
     grab: { width: 40, height: 4, borderRadius: 2, backgroundColor: t.surface3, alignSelf: 'center', marginBottom: 18 },
-    toast: { position: 'absolute', bottom: 100, alignSelf: 'center', backgroundColor: t.accent, paddingVertical: 12, paddingHorizontal: 18, borderRadius: 13 },
+    toast: { position: 'absolute', bottom: 100 + insets.bottom, alignSelf: 'center', backgroundColor: t.accent, paddingVertical: 12, paddingHorizontal: 18, borderRadius: 13 },
     toastTxt: { color: t.onAccent, fontWeight: '700', fontSize: 13.5 },
     confirmBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center', padding: 28 },
     confirmCard: { backgroundColor: t.surface, borderWidth: 1, borderColor: t.line, borderRadius: 20, padding: 22, width: '100%', maxWidth: 420 },

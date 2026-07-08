@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, TextInput, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
 import { Stepper } from '../components';
 import { exerciseById, routineById } from '../store';
 import { uid, kgToDisplay, displayToKg, roundDisplay, weightStepKg, lastPerformance } from '../calc';
@@ -58,8 +58,8 @@ export default function RoutineEditor({ ui, state, dispatch, routineId, onClose 
 
   return (
     <View style={s.overlay}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
+      <View style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={s.overlayScreen} keyboardShouldPersistTaps="handled">
           <Pressable onPress={onClose}><Text style={s.back}>‹ Cancel</Text></Pressable>
           <Text style={s.h1}>{existing ? 'Edit Routine' : 'New Routine'}</Text>
           <Text style={[s.muted, { marginBottom: 18 }]}>{existing ? 'Adjust exercises and target sets' : 'Build a reusable workout plan'}</Text>
@@ -128,7 +128,7 @@ export default function RoutineEditor({ ui, state, dispatch, routineId, onClose 
             <Pressable style={[s.btnDanger, { marginTop: 10 }]} onPress={del}><Text style={s.btnDangerTxt}>Delete Routine</Text></Pressable>
           )}
         </ScrollView>
-      </SafeAreaView>
+      </View>
 
       {showPicker && (
         <ExercisePicker ui={ui} exercises={state.exercises} onPick={addExercise} onClose={() => setShowPicker(false)} />

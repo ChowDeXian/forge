@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Pressable, TextInput, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import * as ImagePicker from 'expo-image-picker';
 import { exerciseById } from '../store';
@@ -67,8 +67,8 @@ export default function CreateExercise({ ui, state, dispatch, exerciseId, onClos
 
   return (
     <View style={s.overlay}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
+      <View style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={s.overlayScreen} keyboardShouldPersistTaps="handled">
           <Pressable onPress={onClose}><Text style={s.back}>‹ Back</Text></Pressable>
           <Text style={s.h1}>{existing ? 'Edit Exercise' : 'New Exercise'}</Text>
           <Text style={[s.muted, { marginBottom: 18 }]}>{existing ? (existing.builtin ? 'Built-in exercise — add notes or a demo video' : 'Update your custom movement') : 'Add a custom movement to your library'}</Text>
@@ -114,7 +114,7 @@ export default function CreateExercise({ ui, state, dispatch, exerciseId, onClos
             <Pressable style={[s.btnDanger, { marginTop: 10 }]} onPress={del}><Text style={s.btnDangerTxt}>Delete Exercise</Text></Pressable>
           )}
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </View>
   );
 }

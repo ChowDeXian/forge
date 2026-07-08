@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, Pressable } from 'react-native';
 import { SecHead } from '../components';
 import { exerciseById } from '../store';
 import { workoutVolume, fmtVolume, fmtDurationShort, fmtWeight, epley } from '../calc';
@@ -22,8 +22,8 @@ export default function WorkoutDetail({ ui, state, dispatch, workoutId, onClose 
 
   return (
     <View style={s.overlay}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
+      <View style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={s.overlayScreen}>
           <Pressable onPress={onClose}><Text style={s.back}>‹ Back</Text></Pressable>
           <Text style={s.h1}>{w.title}</Text>
           <Text style={[s.muted, { marginBottom: 16 }]}>
@@ -58,7 +58,7 @@ export default function WorkoutDetail({ ui, state, dispatch, workoutId, onClose 
 
           <Pressable style={[s.btnDanger, { marginTop: 10 }]} onPress={del}><Text style={s.btnDangerTxt}>Delete Workout</Text></Pressable>
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </View>
   );
 }

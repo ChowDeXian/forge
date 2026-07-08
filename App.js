@@ -1,6 +1,7 @@
 import 'expo'; // installs the web runtime (globalThis.expo) before expo-video and friends evaluate
 import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { View, Text, Pressable, SafeAreaView, Modal, Platform } from 'react-native';
+import { View, Text, Pressable, Modal, Platform } from 'react-native';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useVideoPlayer, VideoView } from 'expo-video';
 
@@ -32,16 +33,19 @@ const TABS = [
 
 export default function App() {
   return (
-    <StoreProvider>
-      <Root />
-    </StoreProvider>
+    <SafeAreaProvider>
+      <StoreProvider>
+        <Root />
+      </StoreProvider>
+    </SafeAreaProvider>
   );
 }
 
 function Root() {
   const { state, dispatch, ready } = useStore();
+  const insets = useSafeAreaInsets();
   const t = state.settings.dark ? THEMES.dark : THEMES.light;
-  const s = useMemo(() => makeStyles(t), [t]);
+  const s = useMemo(() => makeStyles(t, insets), [t, insets.top, insets.bottom, insets.left, insets.right]);
 
   const [tab, setTab] = useState('home');
   const [velocityMounted, setVelocityMounted] = useState(false);
@@ -133,16 +137,16 @@ function Root() {
 
   if (!ready) {
     return (
-      <SafeAreaView style={[s.root, { alignItems: 'center', justifyContent: 'center' }]}>
+      <View style={[s.root, { alignItems: 'center', justifyContent: 'center' }]}>
         <Text style={[s.h1, { letterSpacing: 2 }]}>FORGE</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   const loggerOpen = overlay?.type === 'logger' && !!state.activeSession;
 
   return (
-    <SafeAreaView style={s.root}>
+    <View style={s.root}>
       <StatusBar style={state.settings.dark ? 'light' : 'dark'} />
 
       <View style={{ flex: 1 }}>
@@ -200,7 +204,7 @@ function Root() {
       {toastMsg && (
         <View style={s.toast}><Text style={s.toastTxt}>✓ {toastMsg}</Text></View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 

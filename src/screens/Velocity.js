@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /* FORGE Velocity (bar-speed video analysis) — the vbt sub-app built into dist/vbt/,
    embedded same-origin so its IndexedDB history and the shared service worker just work.
    Web only: the analysis stack (canvas, requestVideoFrameCallback, MediaRecorder) has no native counterpart here. */
 export default function VelocityScreen({ ui }) {
   const { s, t } = ui;
+  const insets = useSafeAreaInsets(); // env() is 0 inside iframes — the host must clear the Dynamic Island
   const [available, setAvailable] = useState(null); // null = checking, false = not in this build (dev server)
 
   useEffect(() => {
@@ -37,7 +39,7 @@ export default function VelocityScreen({ ui }) {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <View style={{ flex: 1, backgroundColor: '#0D0D0D', paddingTop: insets.top }}>
       <iframe
         src="vbt/index.html"
         title="FORGE Velocity"
