@@ -9,6 +9,7 @@ Personal training log. Runs as an installable, fully-offline **PWA** on iPhone; 
 - **History**: real calendar with month navigation, workout log with detail view, est. 1RM trend per exercise (Epley), personal records
 - **Home**: today's planned routine, current streak, weekly volume, recent activity
 - **Profile**: name, kg/lbs, light/dark, default rest timer, JSON backup export/restore
+- **Velocity** (web only): the FORGE Velocity bar-speed analyzer (`../vbt`) embedded as a tab — `npm run build` builds vbt (with `VBT_EMBED=1`, no own service worker) into `dist/vbt/` and the forge service worker makes it offline. Its set history lives in its own IndexedDB (`forge-vbt`), separate from the workout backup.
 
 ## Development (on the PC)
 

@@ -19,8 +19,16 @@ import Logger from './src/screens/Logger';
 import RoutineEditor from './src/screens/RoutineEditor';
 import CreateExercise from './src/screens/CreateExercise';
 import WorkoutDetail from './src/screens/WorkoutDetail';
+import VelocityScreen from './src/screens/Velocity';
 
-const ICON = { home: '⌂', workout: '✦', history: '▥', profile: '◉' };
+const ICON = { home: '⌂', workout: '✦', velocity: '◎', history: '▥', profile: '◉' };
+const TABS = [
+  ['home', 'Home'],
+  ['workout', 'Workout'],
+  ...(Platform.OS === 'web' ? [['velocity', 'Velocity']] : []),
+  ['history', 'History'],
+  ['profile', 'Profile'],
+];
 
 export default function App() {
   return (
@@ -36,6 +44,8 @@ function Root() {
   const s = useMemo(() => makeStyles(t), [t]);
 
   const [tab, setTab] = useState('home');
+  const [velocityMounted, setVelocityMounted] = useState(false);
+  useEffect(() => { if (tab === 'velocity') setVelocityMounted(true); }, [tab]);
   const [overlay, setOverlay] = useState(null); // {type:'logger'|'routineEditor'|'createExercise'|'workoutDetail'|'player', ...}
   const [toastMsg, setToastMsg] = useState(null);
   const [confirmCfg, setConfirmCfg] = useState(null);
@@ -140,6 +150,12 @@ function Root() {
         {tab === 'workout' && <WorkoutScreen ui={ui} state={state} dispatch={dispatch} startWorkout={startWorkout} />}
         {tab === 'history' && <HistoryScreen ui={ui} state={state} />}
         {tab === 'profile' && <ProfileScreen ui={ui} state={state} dispatch={dispatch} />}
+        {/* Velocity stays mounted once visited so an in-progress analysis survives tab switches */}
+        {velocityMounted && (
+          <View style={{ flex: 1, display: tab === 'velocity' ? 'flex' : 'none' }}>
+            <VelocityScreen ui={ui} />
+          </View>
+        )}
       </View>
 
       {state.activeSession && !loggerOpen && (
@@ -148,7 +164,7 @@ function Root() {
 
       {/* Bottom nav */}
       <View style={s.nav}>
-        {[['home', 'Home'], ['workout', 'Workout'], ['history', 'History'], ['profile', 'Profile']].map(([k, label]) => (
+        {TABS.map(([k, label]) => (
           <Pressable key={k} style={s.navItem} onPress={() => setTab(k)}>
             <Text style={[s.navIcon, tab === k && { color: t.accent }]}>{ICON[k]}</Text>
             <Text style={[s.navLabel, tab === k && { color: t.accent }]}>{label}</Text>
