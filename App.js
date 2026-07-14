@@ -7,7 +7,7 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 
 import { THEMES } from './src/theme';
 import { makeStyles } from './src/styles';
-import { StoreProvider, useStore } from './src/store';
+import { StoreProvider, useStore, exerciseById } from './src/store';
 import { ConfirmModal } from './src/components';
 import { uid, fmtDuration } from './src/calc';
 import { getVideoUri } from './src/videoStore';
@@ -86,7 +86,16 @@ function Root() {
         restUntil: null,
         restTotal: null,
         entries: routine
-          ? routine.items.map((i) => ({ exerciseId: i.exerciseId, sets: i.sets.map((st) => ({ w: st.w, r: st.r, done: false })) }))
+          ? routine.items.map((i) => {
+              const ex = exerciseById(state, i.exerciseId);
+              return {
+                exerciseId: i.exerciseId,
+                metric: ex ? ex.metric : 'reps',
+                weighted: ex ? ex.weighted : true,
+                ...(i.supersetId ? { supersetId: i.supersetId } : {}),
+                sets: i.sets.map((st) => ({ w: st.w, v: st.v, done: false })),
+              };
+            })
           : [],
       },
     });

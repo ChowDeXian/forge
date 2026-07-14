@@ -5,7 +5,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { exerciseById } from '../store';
 import { uid } from '../calc';
 import { saveVideo, getVideoUri, deleteVideo } from '../videoStore';
-import { GROUPS } from './ExercisePicker';
+import { GROUPS, EQUIPMENT, METRICS } from './ExercisePicker';
+import { ChipRow } from '../components';
 
 /* Create a new exercise, or edit an existing one (exerciseId set). */
 export default function CreateExercise({ ui, state, dispatch, exerciseId, onClose }) {
@@ -13,8 +14,10 @@ export default function CreateExercise({ ui, state, dispatch, exerciseId, onClos
   const existing = exerciseId ? exerciseById(state, exerciseId) : null;
 
   const [name, setName] = useState(existing ? existing.name : '');
-  const [group, setGroup] = useState(existing ? existing.group : 'Chest');
-  const [equip, setEquip] = useState(existing ? existing.equipment : '');
+  const [group, setGroup] = useState(existing ? existing.group : 'Upper');
+  const [equip, setEquip] = useState(existing ? existing.equipment : 'Dumbbell');
+  const [metric, setMetric] = useState(existing ? existing.metric : 'reps');
+  const [weighted, setWeighted] = useState(existing ? existing.weighted : true);
   const [notes, setNotes] = useState(existing ? existing.notes : '');
   const [videoUri, setVideoUri] = useState(null);
   const [videoChanged, setVideoChanged] = useState(false);
@@ -28,6 +31,12 @@ export default function CreateExercise({ ui, state, dispatch, exerciseId, onClos
   useEffect(() => {
     if (existing && existing.hasVideo) getVideoUri(existing.id).then((uri) => { if (uri) setVideoUri(uri); });
   }, []);
+
+  // picking Body Weight usually means unweighted — follow along, still overridable
+  const pickEquip = (e) => {
+    setEquip(e);
+    if (e === 'Body Weight') setWeighted(false);
+  };
 
   const pickVideo = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -48,9 +57,9 @@ export default function CreateExercise({ ui, state, dispatch, exerciseId, onClos
     } catch (e) {
       toast('Video could not be saved');
     }
-    const patch = { name: name.trim(), group, equipment: equip.trim() || 'Custom', notes: notes.trim(), hasVideo };
+    const patch = { name: name.trim(), group, equipment: equip, metric, weighted, notes: notes.trim(), hasVideo };
     if (existing) dispatch({ type: 'updateExercise', id, patch });
-    else dispatch({ type: 'addExercise', exercise: { id, ...patch, builtin: false } });
+    else dispatch({ type: 'addExercise', exercise: { id, ...patch } });
     toast('Saved ' + patch.name);
     onClose();
   };
@@ -71,22 +80,28 @@ export default function CreateExercise({ ui, state, dispatch, exerciseId, onClos
         <ScrollView contentContainerStyle={s.overlayScreen} keyboardShouldPersistTaps="handled">
           <Pressable onPress={onClose}><Text style={s.back}>‹ Back</Text></Pressable>
           <Text style={s.h1}>{existing ? 'Edit Exercise' : 'New Exercise'}</Text>
-          <Text style={[s.muted, { marginBottom: 18 }]}>{existing ? (existing.builtin ? 'Built-in exercise — add notes or a demo video' : 'Update your custom movement') : 'Add a custom movement to your library'}</Text>
+          <Text style={[s.muted, { marginBottom: 18 }]}>{existing ? 'Update the movement' : 'Add a movement to your library'}</Text>
 
           <Text style={s.fieldLabel}>EXERCISE NAME</Text>
-          <View style={s.field}><TextInput value={name} onChangeText={setName} placeholder="e.g. Spoto Press" placeholderTextColor={t.muted} style={s.input} /></View>
+          <View style={s.field}><TextInput value={name} onChangeText={setName} placeholder="e.g. Wall Sit" placeholderTextColor={t.muted} style={s.input} /></View>
 
-          <Text style={s.fieldLabel}>MUSCLE GROUP</Text>
-          <View style={s.chipsWrap}>
-            {GROUPS.map((g) => (
-              <Pressable key={g} onPress={() => setGroup(g)} style={[s.chip, group === g && { backgroundColor: t.accent, borderColor: t.accent }]}>
-                <Text style={[s.chipTxt, group === g && { color: t.onAccent }]}>{g}</Text>
+          <Text style={s.fieldLabel}>CATEGORY</Text>
+          <ChipRow s={s} t={t} options={GROUPS} value={group} onChange={setGroup} />
+
+          <Text style={s.fieldLabel}>EQUIPMENT</Text>
+          <ChipRow s={s} t={t} options={EQUIPMENT} value={equip} onChange={pickEquip} />
+
+          <Text style={s.fieldLabel}>TRACKED BY</Text>
+          <ChipRow s={s} t={t} options={METRICS.map(([, l]) => l)} value={(METRICS.find(([m]) => m === metric) || METRICS[0])[1]} onChange={(l) => setMetric(METRICS.find(([, x]) => x === l)[0])} />
+
+          <Text style={s.fieldLabel}>LOAD</Text>
+          <View style={[s.seg, { alignSelf: 'flex-start', marginBottom: 18 }]}>
+            {[['Weighted', true], ['Bodyweight', false]].map(([label, val]) => (
+              <Pressable key={label} onPress={() => setWeighted(val)} style={[s.segBtn, weighted === val && { backgroundColor: t.accent }]}>
+                <Text style={[s.segTxt, weighted === val && { color: t.onAccent }]}>{label}</Text>
               </Pressable>
             ))}
           </View>
-
-          <Text style={s.fieldLabel}>EQUIPMENT</Text>
-          <View style={s.field}><TextInput value={equip} onChangeText={setEquip} placeholder="e.g. Barbell" placeholderTextColor={t.muted} style={s.input} /></View>
 
           <Text style={s.fieldLabel}>EXAMPLE VIDEO</Text>
           <Pressable style={s.uploader} onPress={videoUri ? undefined : pickVideo}>
@@ -110,7 +125,7 @@ export default function CreateExercise({ ui, state, dispatch, exerciseId, onClos
           <View style={s.field}><TextInput value={notes} onChangeText={setNotes} placeholder="Cues, setup, tempo…" placeholderTextColor={t.muted} style={[s.input, { height: 70 }]} multiline /></View>
 
           <Pressable style={[s.btnPrimary, { marginTop: 8 }]} onPress={save}><Text style={s.btnPrimaryTxt}>Save Exercise</Text></Pressable>
-          {existing && !existing.builtin && (
+          {existing && (
             <Pressable style={[s.btnDanger, { marginTop: 10 }]} onPress={del}><Text style={s.btnDangerTxt}>Delete Exercise</Text></Pressable>
           )}
         </ScrollView>

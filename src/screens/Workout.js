@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, Modal } from 'react-native';
 import { SecHead } from '../components';
 import { routineById } from '../store';
-import ExercisePicker from './ExercisePicker';
+import ExercisePicker, { metricLabel } from './ExercisePicker';
 
 export const DAYS = [['mon', 'Mon'], ['tue', 'Tue'], ['wed', 'Wed'], ['thu', 'Thu'], ['fri', 'Fri'], ['sat', 'Sat'], ['sun', 'Sun']];
 export const todayKey = () => DAYS[(new Date().getDay() + 6) % 7][0];
@@ -11,7 +11,7 @@ export default function WorkoutScreen({ ui, state, dispatch, startWorkout }) {
   const { s, t } = ui;
   const [pickDay, setPickDay] = useState(null);   // day key being scheduled
   const [browse, setBrowse] = useState(false);    // library browser
-  const customExercises = state.exercises.filter((e) => !e.builtin);
+  const exercises = state.exercises;
   const today = todayKey();
 
   return (
@@ -60,15 +60,15 @@ export default function WorkoutScreen({ ui, state, dispatch, startWorkout }) {
         })}
       </ScrollView>
 
-      <SecHead s={s} right={`${customExercises.length} custom`}>MY EXERCISES</SecHead>
-      {customExercises.length === 0 ? (
-        <View style={s.card}><Text style={[s.muted, { textAlign: 'center', paddingVertical: 14 }]}>No custom exercises yet.{'\n'}Tap Create Exercise to add one.</Text></View>
-      ) : customExercises.map((x) => (
+      <SecHead s={s} right={`${exercises.length}`}>MY EXERCISES</SecHead>
+      {exercises.length === 0 ? (
+        <View style={s.card}><Text style={[s.muted, { textAlign: 'center', paddingVertical: 14 }]}>Your library is empty.{'\n'}Tap Create Exercise to build it — everything else starts there.</Text></View>
+      ) : exercises.map((x) => (
         <Pressable key={x.id} style={[s.card, s.listRow]} onPress={() => ui.open({ type: 'createExercise', exerciseId: x.id })}>
-          <View style={s.ic}><Text style={{ fontSize: 18 }}>{x.hasVideo ? '🎬' : '⭐'}</Text></View>
+          <View style={s.ic}><Text style={{ fontSize: 18 }}>{x.hasVideo ? '🎬' : '🏋️'}</Text></View>
           <View style={{ flex: 1 }}>
             <Text style={s.rowTitle}>{x.name}</Text>
-            <Text style={s.rowSub}>{x.group} · {x.equipment}{x.hasVideo ? ' · has video' : ''}</Text>
+            <Text style={s.rowSub}>{x.group} · {x.equipment} · {metricLabel(x.metric)}{x.weighted ? '' : ' · BW'}</Text>
           </View>
           {x.hasVideo && (
             <Pressable style={[s.pill, { backgroundColor: t.accentDim }]} onPress={() => ui.open({ type: 'player', exerciseId: x.id })}>

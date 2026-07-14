@@ -74,11 +74,12 @@ export function makeStyles(t, insets = { top: 0, bottom: 0, left: 0, right: 0 })
     setRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 9 },
     setNo: { width: 34, height: 30, borderRadius: 9, backgroundColor: t.surface2, alignItems: 'center', justifyContent: 'center' },
     setNoTxt: { fontFamily: MONO, fontWeight: '700', fontSize: 13, color: t.muted },
-    stepper: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: t.surface2, borderRadius: 10, borderWidth: 1, borderColor: t.line, height: 42 },
-    stepBtn: { width: 34, height: '100%', alignItems: 'center', justifyContent: 'center' },
-    stepSign: { fontSize: 20, color: t.text, fontWeight: '600' },
-    stepVal: { flex: 1, textAlign: 'center', fontFamily: MONO, fontWeight: '700', fontSize: 15, color: t.text },
-    stepUnit: { fontSize: 10, color: t.muted },
+    /* draggable value meter (slide to adjust, tap to type) */
+    meter: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: t.surface2, borderRadius: 10, borderWidth: 1, borderColor: t.line, height: 44, paddingHorizontal: 6 },
+    meterVal: { flex: 1, textAlign: 'center', fontFamily: MONO, fontWeight: '700', fontSize: 16, color: t.text },
+    meterHint: { color: t.muted, fontSize: 14, fontWeight: '700', paddingHorizontal: 3 },
+    supersetCard: { borderLeftWidth: 3, borderLeftColor: t.accent },
+    supersetTag: { color: t.accent, fontSize: 10.5, fontWeight: '800', letterSpacing: 1.2, marginBottom: 6 },
     check: { width: 42, height: 42, borderRadius: 11, borderWidth: 1, borderColor: t.line, backgroundColor: t.surface2, alignItems: 'center', justifyContent: 'center' },
     addSet: { marginTop: 6, padding: 11, borderRadius: 11, borderWidth: 1, borderColor: t.line, borderStyle: 'dashed', alignItems: 'center' },
     addSetTxt: { color: t.muted, fontWeight: '600', fontSize: 13.5 },
@@ -89,7 +90,7 @@ export function makeStyles(t, insets = { top: 0, bottom: 0, left: 0, right: 0 })
     /* form */
     fieldLabel: { fontSize: 12, fontWeight: '700', color: t.muted, letterSpacing: 0.8, marginBottom: 8, marginTop: 2 },
     field: { backgroundColor: t.surface, borderWidth: 1, borderColor: t.line, borderRadius: 13, paddingHorizontal: 15, paddingVertical: 4, marginBottom: 18 },
-    input: { color: t.text, fontSize: 15, paddingVertical: 10 },
+    input: { color: t.text, fontSize: 16, paddingVertical: 10 }, // ≥16px or iOS zooms the viewport on focus
     chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 18 },
     chip: { backgroundColor: t.surface, borderWidth: 1, borderColor: t.line, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 999 },
     chipTxt: { color: t.muted, fontSize: 13, fontWeight: '600' },

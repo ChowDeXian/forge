@@ -1,38 +1,34 @@
 import React, { createContext, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SEED_EXERCISES } from './seedExercises';
 
-const KEY = 'forge.state.v1';
+const KEY = 'forge.state.v2';
+const OLD_KEYS = ['forge.state.v1'];
 
 export const EMPTY_SCHEDULE = { mon: null, tue: null, wed: null, thu: null, fri: null, sat: null, sun: null };
 
 export const initialState = {
-  version: 1,
+  version: 2,
   settings: { name: '', unit: 'kg', dark: true, restDefault: 90 },
-  exercises: SEED_EXERCISES,
+  exercises: [], // user-built library: { id, name, group, equipment, metric, weighted, notes, hasVideo }
   routines: [],
   schedule: { ...EMPTY_SCHEDULE },
   workouts: [],
   activeSession: null,
 };
 
-/** Merge a persisted (possibly older-schema) state over current defaults. */
+/** Merge a persisted state over current defaults. */
 export function mergeSaved(saved) {
-  if (!saved || typeof saved !== 'object') return initialState;
-  const merged = {
+  if (!saved || typeof saved !== 'object' || saved.version !== initialState.version) return initialState;
+  return {
     ...initialState,
     ...saved,
     settings: { ...initialState.settings, ...(saved.settings || {}) },
     schedule: { ...EMPTY_SCHEDULE, ...(saved.schedule || {}) },
-    exercises: Array.isArray(saved.exercises) ? [...saved.exercises] : [...SEED_EXERCISES],
+    exercises: Array.isArray(saved.exercises) ? saved.exercises : [],
     routines: Array.isArray(saved.routines) ? saved.routines : [],
     workouts: Array.isArray(saved.workouts) ? saved.workouts : [],
+    version: initialState.version,
   };
-  // append any new built-ins added since the state was saved
-  const have = new Set(merged.exercises.map((e) => e.id));
-  for (const seed of SEED_EXERCISES) if (!have.has(seed.id)) merged.exercises.push(seed);
-  merged.version = initialState.version;
-  return merged;
 }
 
 function reducer(state, action) {
@@ -108,6 +104,7 @@ export function StoreProvider({ children }) {
       .then((raw) => { if (raw) dispatch({ type: 'hydrate', state: mergeSaved(JSON.parse(raw)) }); })
       .catch(() => {})
       .finally(() => setReady(true));
+    AsyncStorage.multiRemove(OLD_KEYS).catch(() => {}); // pre-v2 schema: intentional fresh start
   }, []);
 
   useEffect(() => {

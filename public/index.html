@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no, viewport-fit=cover" />
     <title>%WEB_TITLE%</title>
 
     <!-- PWA -->
@@ -20,19 +20,24 @@
 
     <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
     <style id="expo-reset">
-      /* These styles make the body full-height */
+      /* Lock the page to the screen: fixed body kills iOS rubber-band panning
+         and zoom drift; the app scrolls in its own ScrollViews. */
       html,
       body {
         height: 100%;
       }
-      /* These styles disable body scrolling if you are using <ScrollView> */
       body {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        width: 100%;
         overflow: hidden;
         background-color: #0d0d0d;
         overscroll-behavior: none;
+        touch-action: manipulation;
         -webkit-user-select: none;
         user-select: none;
         -webkit-touch-callout: none;
+        -webkit-text-size-adjust: 100%;
       }
       input, textarea {
         -webkit-user-select: text;

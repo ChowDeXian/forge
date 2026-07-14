@@ -1,17 +1,19 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
-import { Stepper } from '../components';
+import { DragMeter } from '../components';
 import { exerciseById } from '../store';
 import {
-  fmtDuration, kgToDisplay, displayToKg, roundDisplay, weightStepKg, lastPerformance, fmtWeight,
+  uid, fmtDuration, kgToDisplay, displayToKg, roundDisplay, weightStepKg, valueStep,
+  lastPerformance, fmtSet, fmtValue, parseValueInput, defaultSet,
 } from '../calc';
 import ExercisePicker from './ExercisePicker';
+import { VALUE_HEAD } from './RoutineEditor';
 
 export default function Logger({ ui, state, dispatch }) {
   const { s, t, toast, confirm, close } = ui;
   const session = state.activeSession;
   const unit = state.settings.unit;
-  const [showPicker, setShowPicker] = useState(false);
+  const [picker, setPicker] = useState(null); // { superset: index } | { append: true }
 
   // re-render every second for the timers
   const [, tick] = useReducer((x) => x + 1, 0);
@@ -32,14 +34,6 @@ export default function Logger({ ui, state, dispatch }) {
     setEntries(session.entries.map((e, i) =>
       i !== ei ? e : { ...e, sets: e.sets.map((st, j) => (j !== si ? st : { ...st, ...patch })) }));
 
-  const stepW = (ei, si, dir) => {
-    const cur = session.entries[ei].sets[si].w;
-    patchSet(ei, si, { w: Math.max(0, Math.round((cur + dir * weightStepKg(unit)) * 100) / 100) });
-  };
-  const stepR = (ei, si, dir) => {
-    const cur = session.entries[ei].sets[si].r;
-    patchSet(ei, si, { r: Math.max(0, cur + dir) });
-  };
   const toggleDone = (ei, si) => {
     const done = !session.entries[ei].sets[si].done;
     dispatch({
@@ -52,9 +46,9 @@ export default function Logger({ ui, state, dispatch }) {
     });
   };
   const addSet = (ei) => {
-    const sets = session.entries[ei].sets;
-    const last = sets[sets.length - 1] || { w: 20, r: 10 };
-    setEntries(session.entries.map((e, i) => (i !== ei ? e : { ...e, sets: [...e.sets, { w: last.w, r: last.r, done: false }] })));
+    const entry = session.entries[ei];
+    const last = entry.sets[entry.sets.length - 1] || defaultSet(entry);
+    setEntries(session.entries.map((e, i) => (i !== ei ? e : { ...e, sets: [...e.sets, { w: last.w, v: last.v, done: false }] })));
   };
   const removeSet = (ei, si) =>
     setEntries(session.entries.map((e, i) => (i !== ei ? e : { ...e, sets: e.sets.filter((_, j) => j !== si) })));
@@ -66,12 +60,30 @@ export default function Logger({ ui, state, dispatch }) {
       actions: [{ label: 'Cancel' }, { label: 'Remove', danger: true, onPress: () => setEntries(session.entries.filter((_, i) => i !== ei)) }],
     });
   };
-  const addExercise = (ex) => {
-    setShowPicker(false);
+
+  const newEntry = (ex, supersetId) => {
     const last = lastPerformance(state.workouts, ex.id);
-    const w = last ? last.w : 20, r = last ? last.r : 10;
-    setEntries([...session.entries, { exerciseId: ex.id, sets: Array.from({ length: 3 }, () => ({ w, r, done: false })) }]);
-    toast('Added ' + ex.name);
+    const base = last && last.metric === ex.metric ? { w: last.w, v: last.v } : defaultSet(ex);
+    return {
+      exerciseId: ex.id, metric: ex.metric, weighted: ex.weighted,
+      ...(supersetId ? { supersetId } : {}),
+      sets: Array.from({ length: 3 }, () => ({ ...base, done: false })),
+    };
+  };
+  const onPick = (ex) => {
+    const mode = picker;
+    setPicker(null);
+    if (mode && mode.superset !== undefined) {
+      const src = session.entries[mode.superset];
+      const groupId = src.supersetId || uid();
+      const entries = session.entries.map((e, i) => (i === mode.superset ? { ...e, supersetId: groupId } : e));
+      entries.splice(mode.superset + 1, 0, newEntry(ex, groupId));
+      setEntries(entries);
+      toast('Superset: ' + ex.name);
+    } else {
+      setEntries([...session.entries, newEntry(ex)]);
+      toast('Added ' + ex.name);
+    }
   };
 
   const doneCount = session.entries.reduce((a, e) => a + e.sets.filter((x) => x.done).length, 0);
@@ -99,11 +111,6 @@ export default function Logger({ ui, state, dispatch }) {
       message: 'This workout will not be saved.',
       actions: [{ label: 'Keep going' }, { label: 'Discard', danger: true, onPress: () => { dispatch({ type: 'discardSession' }); close(); } }],
     });
-
-  const dispW = (kg) => {
-    const v = roundDisplay(kgToDisplay(kg, unit), unit);
-    return Number.isInteger(v) ? String(v) : String(v);
-  };
 
   return (
     <View style={s.overlay}>
@@ -136,41 +143,51 @@ export default function Logger({ ui, state, dispatch }) {
           )}
           {session.entries.map((entry, ei) => {
             const ex = exerciseById(state, entry.exerciseId);
+            const metric = entry.metric || 'reps';
+            const weighted = entry.weighted !== undefined ? entry.weighted : true;
             const last = lastPerformance(state.workouts, entry.exerciseId);
+            const inSuperset = !!entry.supersetId;
+            const firstOfGroup = inSuperset && (ei === 0 || session.entries[ei - 1].supersetId !== entry.supersetId);
             return (
-              <View key={entry.exerciseId + '-' + ei} style={s.card}>
+              <View key={entry.exerciseId + '-' + ei} style={[s.card, inSuperset && s.supersetCard]}>
+                {firstOfGroup && <Text style={s.supersetTag}>SUPERSET</Text>}
                 <View style={s.rowBetween}>
-                  <Text style={s.exName}>{ex ? ex.name : 'Unknown exercise'}</Text>
-                  <Pressable style={s.iconBtn} onPress={() => removeExercise(ei)}><Text style={s.iconBtnTxt}>✕</Text></Pressable>
+                  <Text style={[s.exName, { flexShrink: 1 }]}>{ex ? ex.name : 'Unknown exercise'}</Text>
+                  <View style={{ flexDirection: 'row', gap: 6 }}>
+                    <Pressable style={s.iconBtn} onPress={() => setPicker({ superset: ei })}><Text style={[s.iconBtnTxt, { color: t.accent }]}>⇄</Text></Pressable>
+                    <Pressable style={s.iconBtn} onPress={() => removeExercise(ei)}><Text style={s.iconBtnTxt}>✕</Text></Pressable>
+                  </View>
                 </View>
                 <Text style={[s.muted, { marginBottom: 12 }]}>
-                  {last ? `Last time: ${fmtWeight(last.w, unit)} × ${last.r}` : 'First time — set your numbers'}
+                  {last ? `Last time: ${fmtSet(last.metric, last.weighted, last.w, last.v, unit)}` : 'First time — set your numbers'}
                 </Text>
                 <View style={s.setHead}>
                   <Text style={[s.setHeadTxt, { width: 34, textAlign: 'center' }]}>SET</Text>
-                  <Text style={[s.setHeadTxt, { flex: 1 }]}>WEIGHT</Text>
-                  <Text style={[s.setHeadTxt, { flex: 1 }]}>REPS</Text>
+                  {weighted && <Text style={[s.setHeadTxt, { flex: 1 }]}>WEIGHT</Text>}
+                  <Text style={[s.setHeadTxt, { flex: 1 }]}>{VALUE_HEAD[metric]}</Text>
                   <Text style={[s.setHeadTxt, { width: 44, textAlign: 'center' }]}>✓</Text>
                 </View>
                 {entry.sets.map((st, si) => (
                   <View key={si} style={s.setRow}>
-                    <Pressable
-                      onLongPress={() => removeSet(ei, si)}
-                      style={[s.setNo, st.done && { backgroundColor: t.accent }]}
-                    >
+                    <Pressable onLongPress={() => removeSet(ei, si)} style={[s.setNo, st.done && { backgroundColor: t.accent }]}>
                       <Text style={[s.setNoTxt, st.done && { color: t.onAccent }]}>{si + 1}</Text>
                     </Pressable>
-                    <Stepper
-                      s={s} t={t} decimal
-                      display={dispW(st.w)} raw={roundDisplay(kgToDisplay(st.w, unit), unit)} unit={unit}
-                      onMinus={() => stepW(ei, si, -1)} onPlus={() => stepW(ei, si, +1)}
-                      onCommit={(v) => patchSet(ei, si, { w: Math.round(displayToKg(v, unit) * 100) / 100 })}
-                    />
-                    <Stepper
+                    {weighted && (
+                      <DragMeter
+                        s={s} t={t}
+                        value={roundDisplay(kgToDisplay(st.w, unit), unit)}
+                        step={roundDisplay(kgToDisplay(weightStepKg(unit), unit), unit)}
+                        format={(v) => `${v} ${unit}`}
+                        onCommit={(v) => patchSet(ei, si, { w: Math.round(displayToKg(v, unit) * 100) / 100 })}
+                      />
+                    )}
+                    <DragMeter
                       s={s} t={t}
-                      display={String(st.r)} raw={st.r}
-                      onMinus={() => stepR(ei, si, -1)} onPlus={() => stepR(ei, si, +1)}
-                      onCommit={(v) => patchSet(ei, si, { r: Math.round(v) })}
+                      value={st.v}
+                      step={valueStep(metric)}
+                      format={(v) => fmtValue(metric, v)}
+                      parse={(txt) => parseValueInput(metric, txt)}
+                      onCommit={(v) => patchSet(ei, si, { v: Math.round(v) })}
                     />
                     <Pressable onPress={() => toggleDone(ei, si)} style={[s.check, st.done && { backgroundColor: t.accent, borderColor: t.accent }]}>
                       <Text style={{ color: st.done ? t.onAccent : t.muted, fontWeight: '800', fontSize: 16 }}>✓</Text>
@@ -178,7 +195,7 @@ export default function Logger({ ui, state, dispatch }) {
                   </View>
                 ))}
                 <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <Pressable style={[s.addSet, { flex: 1 }]} onPress={() => addSet(ei)}><Text style={s.addSetTxt}>+ Add Set</Text></Pressable>
+                  <Pressable style={[s.addSet, { flex: 1 }]} onPress={() => addSet(ei)}><Text style={s.addSetTxt}>+ Set</Text></Pressable>
                   {entry.sets.length > 0 && (
                     <Pressable style={[s.addSet, { paddingHorizontal: 14 }]} onPress={() => removeSet(ei, entry.sets.length - 1)}>
                       <Text style={s.addSetTxt}>− Set</Text>
@@ -189,7 +206,7 @@ export default function Logger({ ui, state, dispatch }) {
             );
           })}
 
-          <Pressable style={[s.btnGhost, { marginTop: 4 }]} onPress={() => setShowPicker(true)}>
+          <Pressable style={[s.btnGhost, { marginTop: 4 }]} onPress={() => setPicker({ append: true })}>
             <Text style={s.btnGhostTxt}>＋ Add Exercise</Text>
           </Pressable>
         </ScrollView>
@@ -200,8 +217,14 @@ export default function Logger({ ui, state, dispatch }) {
         </View>
       </View>
 
-      {showPicker && (
-        <ExercisePicker ui={ui} exercises={state.exercises} onPick={addExercise} onClose={() => setShowPicker(false)} />
+      {picker && (
+        <ExercisePicker
+          ui={ui}
+          exercises={state.exercises}
+          title={picker.superset !== undefined ? 'Superset With' : 'Add Exercise'}
+          onPick={onPick}
+          onClose={() => setPicker(null)}
+        />
       )}
     </View>
   );

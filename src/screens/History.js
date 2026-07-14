@@ -3,9 +3,17 @@ import { View, Text, ScrollView, Pressable } from 'react-native';
 import { SecHead } from '../components';
 import { exerciseById } from '../store';
 import {
-  dayKey, longestStreak, workoutVolume, fmtVolume, fmtDurationShort, fmtWeight,
+  dayKey, longestStreak, workoutVolume, fmtVolume, fmtDurationShort, fmtWeight, fmtValue,
   oneRmSeries, trainedExerciseIds, personalRecords, relativeDay,
 } from '../calc';
+
+const prParts = (p, unit) => {
+  if (p.bestOneRm) return { sub: `Heaviest set · ${fmtWeight(p.heaviest.w, unit)} × ${p.heaviest.v}`, end: fmtWeight(p.bestOneRm.val, unit) };
+  if (p.mostReps) return { sub: 'Most reps in a set', end: `${p.mostReps.v} reps` };
+  if (p.longest) return { sub: p.weighted && p.longest.w > 0 ? `Longest hold · ${fmtWeight(p.longest.w, unit)}` : 'Longest hold', end: fmtValue('time', p.longest.v) };
+  if (p.farthest) return { sub: p.weighted && p.farthest.w > 0 ? `Farthest · ${fmtWeight(p.farthest.w, unit)}` : 'Farthest', end: fmtValue('distance', p.farthest.v) };
+  return { sub: '', end: '' };
+};
 
 export default function HistoryScreen({ ui, state }) {
   const { s, t } = ui;
@@ -36,7 +44,7 @@ export default function HistoryScreen({ ui, state }) {
   const todayK = dayKey(Date.now());
   const monthLabel = new Date(month.y, month.m, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
 
-  const trained = useMemo(() => trainedExerciseIds(workouts), [workouts]);
+  const trained = useMemo(() => trainedExerciseIds(workouts, 'reps'), [workouts]);
   const chartExId = selectedEx || trained[0] || null;
   const series = useMemo(() => (chartExId ? oneRmSeries(workouts, chartExId).slice(-7) : []), [workouts, chartExId]);
   const prs = useMemo(() => personalRecords(workouts).slice(0, 12), [workouts]);
@@ -160,14 +168,15 @@ export default function HistoryScreen({ ui, state }) {
           {prs.map((p) => {
             const ex = exerciseById(state, p.exerciseId);
             if (!ex) return null;
+            const { sub, end } = prParts(p, unit);
             return (
               <View key={p.exerciseId} style={[s.card, s.listRow]}>
                 <View style={s.ic}><Text style={{ fontSize: 18 }}>🏆</Text></View>
                 <View style={{ flex: 1 }}>
                   <Text style={s.rowTitle}>{ex.name}</Text>
-                  <Text style={s.rowSub}>Heaviest set · {fmtWeight(p.heaviest.w, unit)} × {p.heaviest.r}</Text>
+                  <Text style={s.rowSub}>{sub}</Text>
                 </View>
-                <Text style={[s.rowEnd, { color: t.accent }]}>{fmtWeight(p.bestOneRm.v, unit)}</Text>
+                <Text style={[s.rowEnd, { color: t.accent }]}>{end}</Text>
               </View>
             );
           })}

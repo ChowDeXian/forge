@@ -1,4 +1,7 @@
-/* Pure helpers: units, 1RM, volume, streaks, PRs. Weights are stored in kg. */
+/* Pure helpers: units, 1RM, volume, streaks, PRs. Weights are stored in kg.
+   Entries carry a snapshot of how the exercise is tracked:
+   metric 'reps' | 'time' (seconds) | 'distance' (meters), weighted bool.
+   Sets are { w, v, done } — v is the metric value. */
 
 const KG_PER_LB = 0.45359237;
 
@@ -14,8 +17,11 @@ export const fmtWeight = (kg, unit) => {
   return `${s} ${unit}`;
 };
 
-/** Stepper increment expressed in kg for the active unit (2.5 kg / 5 lb). */
+/** Drag-meter increment expressed in kg for the active unit (2.5 kg / 5 lb). */
 export const weightStepKg = (unit) => (unit === 'lbs' ? 5 * KG_PER_LB : 2.5);
+
+/** Drag-meter increment for the metric value column. */
+export const valueStep = (metric) => (metric === 'reps' ? 1 : 5);
 
 export const fmtDuration = (sec) => {
   const h = String(Math.floor(sec / 3600)).padStart(2, '0');
@@ -29,7 +35,39 @@ export const fmtDurationShort = (sec) => {
   return m < 60 ? `${m} min` : `${Math.floor(m / 60)}h ${m % 60}m`;
 };
 
-/** Epley estimated 1RM. */
+/** Metric value for display: reps "8", time "45s"/"1:30", distance "100 m". */
+export const fmtValue = (metric, v) => {
+  if (metric === 'time') return v < 60 ? `${v}s` : `${Math.floor(v / 60)}:${String(Math.round(v % 60)).padStart(2, '0')}`;
+  if (metric === 'distance') return `${v} m`;
+  return String(v);
+};
+
+/** Whole logged set for display, e.g. "80 kg × 8", "45s", "20 kg × 1:00", "100 m". */
+export const fmtSet = (metric, weighted, w, v, unit) => {
+  const val = metric === 'reps' && !weighted ? `${v} reps` : fmtValue(metric, v);
+  return weighted ? `${fmtWeight(w, unit)} × ${fmtValue(metric, v)}` : val;
+};
+
+/** Parse a typed metric value; time accepts "90", "90s" or "1:30". Returns null if invalid. */
+export const parseValueInput = (metric, text) => {
+  const raw = String(text).trim().toLowerCase().replace(',', '.');
+  if (metric === 'time' && raw.includes(':')) {
+    const [m, sec] = raw.split(':');
+    const mm = parseInt(m, 10), ss = parseFloat(sec);
+    if (Number.isNaN(mm) || Number.isNaN(ss)) return null;
+    return mm * 60 + ss;
+  }
+  const v = parseFloat(raw.replace(/[a-z ]+$/, ''));
+  return Number.isNaN(v) ? null : v;
+};
+
+/** Sensible starting set when there's no history for an exercise. */
+export const defaultSet = (exercise) => ({
+  w: exercise.weighted ? 20 : 0,
+  v: exercise.metric === 'time' ? 30 : exercise.metric === 'distance' ? 100 : 10,
+});
+
+/** Epley estimated 1RM (weighted reps only). */
 export const epley = (w, r) => (r <= 1 ? w : w * (1 + r / 30));
 
 /** 'YYYY-MM-DD' key in local time. */
@@ -38,11 +76,15 @@ export const dayKey = (ts) => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
-export const doneSets = (workout) =>
-  workout.entries.flatMap((e) => e.sets.filter((s) => s.done).map((s) => ({ ...s, exerciseId: e.exerciseId })));
+const entryMetric = (e) => e.metric || 'reps';
+const entryWeighted = (e) => (e.weighted !== undefined ? e.weighted : true);
 
+/** Tonnage: weight × reps over done sets of weighted rep-tracked entries. */
 export const workoutVolume = (workout) =>
-  doneSets(workout).reduce((a, s) => a + s.w * s.r, 0);
+  workout.entries.reduce((a, e) => {
+    if (entryMetric(e) !== 'reps' || !entryWeighted(e)) return a;
+    return a + e.sets.filter((s) => s.done).reduce((b, s) => b + s.w * s.v, 0);
+  }, 0);
 
 export const fmtVolume = (kg, unit) => {
   const v = kgToDisplay(kg, unit);
@@ -87,56 +129,83 @@ export function weeklyVolume(workouts, now = Date.now()) {
   });
 }
 
-/** Most recent done performance of an exercise: { w, r, when } or null. */
+export const bestSetOf = (entry) => {
+  const done = entry.sets.filter((s) => s.done && s.v > 0);
+  if (!done.length) return null;
+  if (entryMetric(entry) === 'reps' && entryWeighted(entry)) {
+    return done.reduce((a, s) => (epley(s.w, s.v) > epley(a.w, a.v) ? s : a));
+  }
+  return done.reduce((a, s) => (s.v > a.v ? s : a));
+};
+
+/** Most recent done performance of an exercise: { metric, weighted, w, v, when } or null. */
 export function lastPerformance(workouts, exerciseId) {
   const sorted = [...workouts].sort((a, b) => b.startedAt - a.startedAt);
   for (const w of sorted) {
     const entry = w.entries.find((e) => e.exerciseId === exerciseId);
-    const done = entry ? entry.sets.filter((s) => s.done) : [];
-    if (done.length) {
-      const best = done.reduce((a, s) => (epley(s.w, s.r) > epley(a.w, a.r) ? s : a));
-      return { w: best.w, r: best.r, when: w.startedAt };
-    }
+    if (!entry) continue;
+    const best = bestSetOf(entry);
+    if (best) return { metric: entryMetric(entry), weighted: entryWeighted(entry), w: best.w, v: best.v, when: w.startedAt };
   }
   return null;
 }
 
-/** Per-workout best est. 1RM series for an exercise, oldest first. */
+/** Per-workout best est. 1RM series (weighted reps entries only), oldest first. */
 export function oneRmSeries(workouts, exerciseId) {
   return [...workouts]
     .sort((a, b) => a.startedAt - b.startedAt)
     .map((w) => {
       const entry = w.entries.find((e) => e.exerciseId === exerciseId);
-      const done = entry ? entry.sets.filter((s) => s.done && s.w > 0 && s.r > 0) : [];
+      if (!entry || entryMetric(entry) !== 'reps' || !entryWeighted(entry)) return null;
+      const done = entry.sets.filter((s) => s.done && s.w > 0 && s.v > 0);
       if (!done.length) return null;
-      return { when: w.startedAt, oneRm: Math.max(...done.map((s) => epley(s.w, s.r))) };
+      return { when: w.startedAt, oneRm: Math.max(...done.map((s) => epley(s.w, s.v))) };
     })
     .filter(Boolean);
 }
 
-/** Exercise ids that appear in history, most-trained first. */
-export function trainedExerciseIds(workouts) {
+/** Exercise ids that appear in history, most-trained first. Optional metric filter. */
+export function trainedExerciseIds(workouts, metric) {
   const count = {};
-  for (const w of workouts) for (const e of w.entries) if (e.sets.some((s) => s.done)) count[e.exerciseId] = (count[e.exerciseId] || 0) + 1;
+  for (const w of workouts) {
+    for (const e of w.entries) {
+      if (metric && entryMetric(e) !== metric) continue;
+      if (metric === 'reps' && !entryWeighted(e)) continue; // 1RM chart needs weight
+      if (e.sets.some((s) => s.done)) count[e.exerciseId] = (count[e.exerciseId] || 0) + 1;
+    }
+  }
   return Object.keys(count).sort((a, b) => count[b] - count[a]);
 }
 
-/** PRs per exercise: { exerciseId, bestOneRm:{w,r,v}, heaviest:{w,r}, mostReps:{w,r} }. */
+/** PRs per exercise, typed by metric:
+    reps+weighted → { bestOneRm: {w,v,val}, heaviest: {w,v} }
+    reps bodyweight → { mostReps: {v} }
+    time → { longest: {w,v} }   distance → { farthest: {w,v} } */
 export function personalRecords(workouts) {
   const prs = {};
   for (const w of workouts) {
     for (const e of w.entries) {
+      const metric = entryMetric(e), weighted = entryWeighted(e);
       for (const s of e.sets) {
-        if (!s.done || s.w <= 0 || s.r <= 0) continue;
-        const p = prs[e.exerciseId] || (prs[e.exerciseId] = { exerciseId: e.exerciseId, bestOneRm: null, heaviest: null, mostReps: null });
-        const v = epley(s.w, s.r);
-        if (!p.bestOneRm || v > p.bestOneRm.v) p.bestOneRm = { w: s.w, r: s.r, v };
-        if (!p.heaviest || s.w > p.heaviest.w) p.heaviest = { w: s.w, r: s.r };
-        if (!p.mostReps || s.r > p.mostReps.r) p.mostReps = { w: s.w, r: s.r };
+        if (!s.done || s.v <= 0) continue;
+        const p = prs[e.exerciseId] || (prs[e.exerciseId] = { exerciseId: e.exerciseId, metric, weighted });
+        if (metric === 'reps' && weighted) {
+          if (s.w <= 0) continue;
+          const val = epley(s.w, s.v);
+          if (!p.bestOneRm || val > p.bestOneRm.val) p.bestOneRm = { w: s.w, v: s.v, val };
+          if (!p.heaviest || s.w > p.heaviest.w) p.heaviest = { w: s.w, v: s.v };
+        } else if (metric === 'reps') {
+          if (!p.mostReps || s.v > p.mostReps.v) p.mostReps = { v: s.v };
+        } else if (metric === 'time') {
+          if (!p.longest || s.v > p.longest.v) p.longest = { w: s.w, v: s.v };
+        } else if (!p.farthest || s.v > p.farthest.v) {
+          p.farthest = { w: s.w, v: s.v };
+        }
       }
     }
   }
-  return Object.values(prs).sort((a, b) => b.bestOneRm.v - a.bestOneRm.v);
+  const rank = (p) => (p.bestOneRm ? p.bestOneRm.val : p.longest ? p.longest.v : p.farthest ? p.farthest.v : p.mostReps ? p.mostReps.v : 0);
+  return Object.values(prs).filter((p) => rank(p) > 0).sort((a, b) => rank(b) - rank(a));
 }
 
 export const totalVolume = (workouts) => workouts.reduce((a, w) => a + workoutVolume(w), 0);

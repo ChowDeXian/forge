@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { SecHead } from '../components';
 import { exerciseById } from '../store';
-import { workoutVolume, fmtVolume, fmtDurationShort, fmtWeight, epley } from '../calc';
+import { workoutVolume, fmtVolume, fmtDurationShort, fmtSet, bestSetOf } from '../calc';
 
 export default function WorkoutDetail({ ui, state, dispatch, workoutId, onClose }) {
   const { s, t, toast, confirm } = ui;
@@ -39,17 +39,19 @@ export default function WorkoutDetail({ ui, state, dispatch, workoutId, onClose 
           <SecHead s={s}>EXERCISES</SecHead>
           {w.entries.map((e, i) => {
             const ex = exerciseById(state, e.exerciseId);
-            const best = e.sets.reduce((a, st) => (epley(st.w, st.r) > epley(a.w, a.r) ? st : a), e.sets[0]);
+            const metric = e.metric || 'reps';
+            const weighted = e.weighted !== undefined ? e.weighted : true;
+            const best = bestSetOf({ ...e, sets: e.sets.map((st) => ({ ...st, done: true })) });
             return (
-              <View key={i} style={s.card}>
+              <View key={i} style={[s.card, e.supersetId && s.supersetCard]}>
                 <View style={s.rowBetween}>
-                  <Text style={s.exName}>{ex ? ex.name : 'Deleted exercise'}</Text>
-                  <Text style={[s.rowEnd, { color: t.accent }]}>{best ? `${fmtWeight(best.w, unit)} × ${best.r}` : ''}</Text>
+                  <Text style={[s.exName, { flexShrink: 1 }]}>{ex ? ex.name : 'Deleted exercise'}</Text>
+                  <Text style={[s.rowEnd, { color: t.accent }]}>{best ? fmtSet(metric, weighted, best.w, best.v, unit) : ''}</Text>
                 </View>
                 {e.sets.map((st, si) => (
                   <View key={si} style={[s.rowBetween, { paddingVertical: 5 }]}>
                     <Text style={[s.monoTxt, { color: t.muted }]}>SET {si + 1}</Text>
-                    <Text style={[s.monoTxt, { color: t.text, fontWeight: '700' }]}>{fmtWeight(st.w, unit)} × {st.r}</Text>
+                    <Text style={[s.monoTxt, { color: t.text, fontWeight: '700' }]}>{fmtSet(metric, weighted, st.w, st.v, unit)}</Text>
                   </View>
                 ))}
               </View>
