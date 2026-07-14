@@ -45,10 +45,12 @@
       }
       /* Root fills the whole screen edge-to-edge; safe-area insets are
          applied per-surface inside the app (react-native-safe-area-context). */
+      /* NOTE: no dvh here — iOS standalone PWAs under-report dynamic viewport
+         units (excludes safe areas), which shows up as a dead bar at the bottom.
+         The fixed-position body already spans the exact visual viewport. */
       #root {
         display: flex;
         height: 100%;
-        height: 100dvh;
         flex: 1;
       }
     </style>
