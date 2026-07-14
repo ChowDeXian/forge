@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
     <title>FORGE</title>
 
     <!-- PWA -->
@@ -20,21 +20,16 @@
 
     <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
     <style id="expo-reset">
-      /* Lock the page to the screen: fixed body kills iOS rubber-band panning
-         and zoom drift; the app scrolls in its own ScrollViews. */
+      /* Screen unlocked: the page flows naturally so Safari's toolbar can
+         collapse and the browser manages the visible height itself. */
       html,
       body {
         height: 100%;
       }
       body {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100%;
-        height: 100%; /* corrected to the live window height by the fit() script below */
         overflow: hidden;
         background-color: #0d0d0d;
         overscroll-behavior: none;
-        touch-action: manipulation;
         -webkit-user-select: none;
         user-select: none;
         -webkit-touch-callout: none;
@@ -44,11 +39,6 @@
         -webkit-user-select: text;
         user-select: text;
       }
-      /* Root fills the whole screen edge-to-edge; safe-area insets are
-         applied per-surface inside the app (react-native-safe-area-context). */
-      /* NOTE: no dvh here — iOS standalone PWAs under-report dynamic viewport
-         units (excludes safe areas), which shows up as a dead bar at the bottom.
-         The fixed-position body already spans the exact visual viewport. */
       #root {
         display: flex;
         height: 100%;
@@ -65,14 +55,6 @@
     <!-- The root element for your Expo app. -->
     <div id="root"></div>
     <script>
-      // iOS never resolves CSS 100%/vh/dvh to the real visible height in all modes
-      // (Safari's collapsing toolbar, standalone safe areas). Measure it instead.
-      (function () {
-        function fit() { document.body.style.height = window.innerHeight + 'px'; }
-        window.addEventListener('resize', fit);
-        window.addEventListener('orientationchange', fit);
-        fit();
-      })();
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
           navigator.serviceWorker.register('sw.js').catch(function () { /* dev server has no sw.js */ });
@@ -85,6 +67,6 @@
         });
       }
     </script>
-  <script src="/forge/_expo/static/js/web/AppEntry-881805b8336291c59b72b1b95da9d6d7.js" defer></script>
+  <script src="/forge/_expo/static/js/web/AppEntry-96d6ccfeacf28b234c292b24fb71967c.js" defer></script>
 </body>
 </html>
