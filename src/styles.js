@@ -48,8 +48,8 @@ export function makeStyles(t, insets = { top: 0, bottom: 0, left: 0, right: 0 })
     rowSub: { color: t.muted, fontSize: 12.5, marginTop: 2 },
     rowEnd: { fontFamily: MONO, color: t.muted, fontWeight: '700', fontSize: 13 },
 
-    // nav content hugs the home indicator: reuse part of the inset band instead of stacking padding on top of it
-    nav: { flexDirection: 'row', backgroundColor: t.surface, borderTopWidth: 1, borderTopColor: t.line, paddingTop: 8, paddingBottom: Math.max(insets.bottom - 10, 8) },
+    // nav sits lower on the screen: extra 20px below the labels clears the Safari bookmark bar
+    nav: { flexDirection: 'row', backgroundColor: t.surface, borderTopWidth: 1, borderTopColor: t.line, paddingTop: 8, paddingBottom: Math.max(insets.bottom - 10, 8) + 20 },
     navItem: { flex: 1, alignItems: 'center', gap: 3 },
     navIcon: { fontSize: 20, color: t.muted },
     navLabel: { fontSize: 10.5, fontWeight: '600', color: t.muted },
