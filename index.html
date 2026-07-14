@@ -68,8 +68,14 @@
         window.addEventListener('load', function () {
           navigator.serviceWorker.register('sw.js').catch(function () { /* dev server has no sw.js */ });
         });
+        // when an update activates, reload once so the new version applies on this launch
+        var hadController = !!navigator.serviceWorker.controller;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (hadController) location.reload();
+          hadController = true;
+        });
       }
     </script>
-  <script src="/forge/_expo/static/js/web/AppEntry-35f4259a88672b37d1fe221684878ce6.js" defer></script>
+  <script src="/forge/_expo/static/js/web/AppEntry-6c7f2279ba6375ad7c5de3ab02f3dc12.js" defer></script>
 </body>
 </html>
