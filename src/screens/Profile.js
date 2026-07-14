@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, TextInput, Platform, Share } from 'r
 import { SecHead, SettingRow, Toggle } from '../components';
 import { totalVolume, fmtVolume } from '../calc';
 import { mergeSaved } from '../store';
+import { version as APP_VERSION } from '../../package.json';
 
 const REST_OPTIONS = [60, 90, 120, 180];
 
@@ -105,6 +106,7 @@ export default function ProfileScreen({ ui, state, dispatch }) {
       <Text style={[s.muted, { marginTop: 12, lineHeight: 18 }]}>
         All data lives on this device. Export a backup now and then — especially before clearing Safari website data.
       </Text>
+      <Text style={[s.muted, s.monoTxt, { textAlign: 'center', marginTop: 18 }]}>FORGE v{APP_VERSION}</Text>
     </ScrollView>
   );
 }

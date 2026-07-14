@@ -67,6 +67,12 @@
         window.addEventListener('load', function () {
           navigator.serviceWorker.register('sw.js').catch(function () { /* dev server has no sw.js */ });
         });
+        // when an update activates, reload once so the new version applies on this launch
+        var hadController = !!navigator.serviceWorker.controller;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (hadController) location.reload();
+          hadController = true;
+        });
       }
     </script>
   </body>
