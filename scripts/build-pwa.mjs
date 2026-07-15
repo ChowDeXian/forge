@@ -75,6 +75,31 @@ async function serveShell(path, request) {
   return new Response(body, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }
 
+/* Network-first for the HTML shell: a refresh while online always gets the
+   CURRENT index.html (matching the freshly-deployed bundle hash), so a stale
+   cached shell can never point at a bundle that has been evicted/replaced
+   (the black-screen bug). Offline / slow network falls back to the cached
+   shell. Hashed assets stay cache-first below (immutable, safe). */
+async function networkFirstShell(shellPath, request) {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(function () { ctrl.abort(); }, 3500);
+    const net = await fetch(request, { signal: ctrl.signal });
+    clearTimeout(timer);
+    if (net && net.ok) {
+      if (net.redirected) {
+        const body = await net.blob();
+        return new Response(body, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+      }
+      caches.open(CACHE).then(function (c) { c.put(shellPath, net.clone()); }).catch(function () {});
+      return net;
+    }
+    throw new Error('status ' + (net && net.status));
+  } catch (err) {
+    return serveShell(shellPath, request);
+  }
+}
+
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
@@ -100,7 +125,7 @@ self.addEventListener('fetch', (e) => {
   if (e.request.mode === 'navigate') {
     // the Velocity tab iframe navigates to the vbt sub-app — don't hand it the forge shell
     const shell = url.pathname.startsWith(BASE + 'vbt/') ? BASE + 'vbt/index.html' : BASE + 'index.html';
-    e.respondWith(serveShell(shell, e.request));
+    e.respondWith(networkFirstShell(shell, e.request));
     return;
   }
   e.respondWith(
