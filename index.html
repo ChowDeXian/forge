@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
     <title>FORGE</title>
 
     <!-- PWA -->
@@ -20,8 +20,8 @@
 
     <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
     <style id="expo-reset">
-      /* Natural-flow height (fills the screen correctly, Safari manages the
-         visible area) but zoom/pan is pinned so the view can't drift around. */
+      /* Unlocked: the page flows naturally so Safari's toolbar can collapse
+         and the browser fills the visible height itself (no bottom black bar). */
       html,
       body {
         height: 100%;
@@ -30,7 +30,6 @@
         overflow: hidden;
         background-color: #0d0d0d;
         overscroll-behavior: none;
-        touch-action: manipulation;
         -webkit-user-select: none;
         user-select: none;
         -webkit-touch-callout: none;
@@ -68,6 +67,6 @@
         });
       }
     </script>
-  <script src="/forge/_expo/static/js/web/AppEntry-d0a5b0cbe557f57408c52b484bbc12ad.js" defer></script>
+  <script src="/forge/_expo/static/js/web/AppEntry-ab923f7c46c3d9ae26db0838f868ec50.js" defer></script>
 </body>
 </html>
