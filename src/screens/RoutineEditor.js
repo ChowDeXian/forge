@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
-import { DragMeter } from '../components';
+import { DragMeter, BackButton } from '../components';
+import { ArrowUp, ArrowDown, X, Repeat } from 'lucide-react-native';
 import { exerciseById, routineById } from '../store';
 import {
   uid, kgToDisplay, displayToKg, roundDisplay, weightStepKg, valueStep,
@@ -81,7 +82,7 @@ export default function RoutineEditor({ ui, state, dispatch, routineId, onClose 
     <View style={s.overlay}>
       <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={s.overlayScreen} keyboardShouldPersistTaps="handled">
-          <Pressable onPress={onClose}><Text style={s.back}>‹ Cancel</Text></Pressable>
+          <BackButton s={s} t={t} label="Cancel" onPress={onClose} />
           <Text style={s.h1}>{existing ? 'Edit Routine' : 'New Routine'}</Text>
           <Text style={[s.muted, { marginBottom: 18 }]}>{existing ? 'Adjust exercises and target sets' : 'Build a reusable workout plan'}</Text>
 
@@ -106,9 +107,9 @@ export default function RoutineEditor({ ui, state, dispatch, routineId, onClose 
                 <View style={s.rowBetween}>
                   <Text style={[s.exName, { flexShrink: 1 }]}>{ex ? ex.name : 'Unknown exercise'}</Text>
                   <View style={{ flexDirection: 'row', gap: 6 }}>
-                    <Pressable style={s.iconBtn} onPress={() => move(ii, -1)}><Text style={s.iconBtnTxt}>↑</Text></Pressable>
-                    <Pressable style={s.iconBtn} onPress={() => move(ii, +1)}><Text style={s.iconBtnTxt}>↓</Text></Pressable>
-                    <Pressable style={s.iconBtn} onPress={() => removeItem(ii)}><Text style={s.iconBtnTxt}>✕</Text></Pressable>
+                    <Pressable style={s.iconBtn} onPress={() => move(ii, -1)}><ArrowUp size={15} color={t.muted} strokeWidth={2.4} /></Pressable>
+                    <Pressable style={s.iconBtn} onPress={() => move(ii, +1)}><ArrowDown size={15} color={t.muted} strokeWidth={2.4} /></Pressable>
+                    <Pressable style={s.iconBtn} onPress={() => removeItem(ii)}><X size={15} color={t.muted} strokeWidth={2.4} /></Pressable>
                   </View>
                 </View>
                 {ex && <Text style={[s.muted, { marginTop: 2 }]}>{metricLabel(metric)}{weighted ? ' · weighted' : ' · bodyweight'}</Text>}
@@ -146,8 +147,9 @@ export default function RoutineEditor({ ui, state, dispatch, routineId, onClose 
                       <Text style={s.addSetTxt}>− Set</Text>
                     </Pressable>
                   )}
-                  <Pressable style={[s.addSet, { paddingHorizontal: 14 }]} onPress={() => setPicker({ superset: ii })}>
-                    <Text style={[s.addSetTxt, { color: t.accent }]}>⇄ Superset</Text>
+                  <Pressable style={[s.addSet, { paddingHorizontal: 14, flexDirection: 'row', gap: 6 }]} onPress={() => setPicker({ superset: ii })}>
+                    <Repeat size={14} color={t.accent} strokeWidth={2.4} />
+                    <Text style={[s.addSetTxt, { color: t.accent }]}>Superset</Text>
                   </Pressable>
                 </View>
               </View>

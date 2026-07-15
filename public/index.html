@@ -20,6 +20,22 @@
 
     <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
     <style id="expo-reset">
+      /* FORGE design-language fonts, self-hosted (offline-first, precached by SW).
+         Variable weight so RN-web fontWeight values map correctly. */
+      @font-face {
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 100 900;
+        font-display: swap;
+        src: url('fonts/inter.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'JetBrains Mono';
+        font-style: normal;
+        font-weight: 100 800;
+        font-display: swap;
+        src: url('fonts/jetbrains-mono.woff2') format('woff2');
+      }
       /* Unlocked: the page flows naturally so Safari's toolbar can collapse
          and the browser fills the visible height itself (no bottom black bar). */
       html,
@@ -29,6 +45,7 @@
       body {
         overflow: hidden;
         background-color: #0d0d0d;
+        font-family: 'Inter', -apple-system, system-ui, sans-serif;
         overscroll-behavior: none;
         -webkit-user-select: none;
         user-select: none;

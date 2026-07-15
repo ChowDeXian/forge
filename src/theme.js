@@ -13,4 +13,5 @@ export const THEMES = {
   },
 };
 
-export const MONO = Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' });
+// Web ships self-hosted JetBrains Mono (see index.html @font-face); native falls back.
+export const MONO = Platform.select({ web: "'JetBrains Mono', ui-monospace, monospace", ios: 'Menlo', android: 'monospace', default: 'monospace' });

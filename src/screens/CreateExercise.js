@@ -6,7 +6,7 @@ import { exerciseById } from '../store';
 import { uid } from '../calc';
 import { saveVideo, getVideoUri, deleteVideo } from '../videoStore';
 import { GROUPS, EQUIPMENT, METRICS } from './ExercisePicker';
-import { ChipRow } from '../components';
+import { ChipRow, BackButton } from '../components';
 
 /* Create a new exercise, or edit an existing one (exerciseId set). */
 export default function CreateExercise({ ui, state, dispatch, exerciseId, onClose }) {
@@ -78,7 +78,7 @@ export default function CreateExercise({ ui, state, dispatch, exerciseId, onClos
     <View style={s.overlay}>
       <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={s.overlayScreen} keyboardShouldPersistTaps="handled">
-          <Pressable onPress={onClose}><Text style={s.back}>‹ Back</Text></Pressable>
+          <BackButton s={s} t={t} onPress={onClose} />
           <Text style={s.h1}>{existing ? 'Edit Exercise' : 'New Exercise'}</Text>
           <Text style={[s.muted, { marginBottom: 18 }]}>{existing ? 'Update the movement' : 'Add a movement to your library'}</Text>
 

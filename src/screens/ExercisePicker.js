@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
+import { BackButton } from '../components';
 
 export const GROUPS = ['Upper', 'Lower', 'Core', 'Isometrics', 'Plyometrics'];
 export const EQUIPMENT = ['Dumbbell', 'Barbell', 'Machine', 'Body Weight'];
@@ -25,7 +26,7 @@ export default function ExercisePicker({ ui, exercises, title = 'Add Exercise', 
     <View style={s.overlay}>
       <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={s.overlayScreen} keyboardShouldPersistTaps="handled">
-          <Pressable onPress={onClose}><Text style={s.back}>‹ Back</Text></Pressable>
+          <BackButton s={s} t={t} onPress={onClose} />
           <Text style={[s.h1, { marginBottom: 14 }]}>{title}</Text>
 
           <View style={[s.field, { marginBottom: 12 }]}>

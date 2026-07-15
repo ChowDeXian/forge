@@ -21,8 +21,10 @@ import RoutineEditor from './src/screens/RoutineEditor';
 import CreateExercise from './src/screens/CreateExercise';
 import WorkoutDetail from './src/screens/WorkoutDetail';
 import VelocityScreen from './src/screens/Velocity';
+import InstallPrompt from './src/screens/InstallPrompt';
+import { House, Dumbbell, Gauge, ChartColumn, User, Play } from 'lucide-react-native';
 
-const ICON = { home: '⌂', workout: '✦', velocity: '◎', history: '▥', profile: '◉' };
+const TAB_ICON = { home: House, workout: Dumbbell, velocity: Gauge, history: ChartColumn, profile: User };
 const TABS = [
   ['home', 'Home'],
   ['workout', 'Workout'],
@@ -48,6 +50,7 @@ function Root() {
   const s = useMemo(() => makeStyles(t, insets), [t, insets.top, insets.bottom, insets.left, insets.right]);
 
   const [tab, setTab] = useState('home');
+  const [installOpen, setInstallOpen] = useState(false);
   const [velocityMounted, setVelocityMounted] = useState(false);
   useEffect(() => { if (tab === 'velocity') setVelocityMounted(true); }, [tab]);
   const [overlay, setOverlay] = useState(null); // {type:'logger'|'routineEditor'|'createExercise'|'workoutDetail'|'player', ...}
@@ -73,6 +76,7 @@ function Root() {
     confirm: setConfirmCfg,
     open: setOverlay,
     close: () => setOverlay(null),
+    openInstall: () => setInstallOpen(true),
   }), [s, t]);
 
   const beginSession = (routine) => {
@@ -172,17 +176,21 @@ function Root() {
       </View>
 
       {state.activeSession && !loggerOpen && (
-        <ResumeBar s={s} session={state.activeSession} onPress={() => setOverlay({ type: 'logger' })} />
+        <ResumeBar s={s} t={t} session={state.activeSession} onPress={() => setOverlay({ type: 'logger' })} />
       )}
 
-      {/* Bottom nav */}
+      {/* Floating pill nav */}
       <View style={s.nav}>
-        {TABS.map(([k, label]) => (
-          <Pressable key={k} style={s.navItem} onPress={() => setTab(k)}>
-            <Text style={[s.navIcon, tab === k && { color: t.accent }]}>{ICON[k]}</Text>
-            <Text style={[s.navLabel, tab === k && { color: t.accent }]}>{label}</Text>
-          </Pressable>
-        ))}
+        {TABS.map(([k, label]) => {
+          const active = tab === k;
+          const IconCmp = TAB_ICON[k];
+          return (
+            <Pressable key={k} style={[s.navItem, active && s.navItemActive]} onPress={() => setTab(k)}>
+              <IconCmp size={20} strokeWidth={2.2} color={active ? t.onAccent : t.muted} />
+              <Text style={[s.navLabel, active && { color: t.onAccent }]}>{label}</Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       {/* Overlays */}
@@ -208,6 +216,8 @@ function Root() {
         </View>
       </Modal>
 
+      <InstallPrompt ui={ui} open={installOpen} onClose={() => setInstallOpen(false)} />
+
       <ConfirmModal s={s} t={t} config={confirmCfg} onClose={() => setConfirmCfg(null)} />
 
       {toastMsg && (
@@ -217,7 +227,7 @@ function Root() {
   );
 }
 
-function ResumeBar({ s, session, onPress }) {
+function ResumeBar({ s, t, session, onPress }) {
   const [, tick] = useReducer((x) => x + 1, 0);
   useEffect(() => {
     const id = setInterval(tick, 1000);
@@ -226,7 +236,8 @@ function ResumeBar({ s, session, onPress }) {
   const elapsed = Math.max(0, Math.floor((Date.now() - session.startedAt) / 1000));
   return (
     <Pressable style={s.resumeBar} onPress={onPress}>
-      <Text style={s.resumeTxt}>▶ {session.title}</Text>
+      <Play size={15} color={t.onAccent} fill={t.onAccent} strokeWidth={2} />
+      <Text style={s.resumeTxt}>{session.title}</Text>
       <Text style={s.resumeTimer}>{fmtDuration(elapsed)}</Text>
     </Pressable>
   );

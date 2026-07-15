@@ -1,5 +1,15 @@
 import React, { useRef, useState } from 'react';
 import { View, Text, Pressable, TextInput, Modal, PanResponder } from 'react-native';
+import { ChevronLeft } from 'lucide-react-native';
+
+export function BackButton({ s, t, label = 'Back', onPress }) {
+  return (
+    <Pressable style={s.backRow} onPress={onPress} hitSlop={8}>
+      <ChevronLeft size={18} color={t.text} strokeWidth={2.4} />
+      <Text style={s.back}>{label}</Text>
+    </Pressable>
+  );
+}
 
 /* Draggable value meter: slide left/right to change (one step per ~18px),
    tap to type an exact value. `value` is in display units.

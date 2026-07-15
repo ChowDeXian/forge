@@ -11,6 +11,8 @@ export default function ProfileScreen({ ui, state, dispatch }) {
   const { s, t, toast } = ui;
   const { settings } = state;
   const setSetting = (key, value) => dispatch({ type: 'setSetting', key, value });
+  const canInstall = Platform.OS === 'web' && typeof navigator !== 'undefined'
+    && !(navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
   const initials = (settings.name.trim() || 'You').split(/\s+/).map((p) => p[0]).join('').slice(0, 2).toUpperCase();
 
   const exportData = async () => {
@@ -99,6 +101,14 @@ export default function ProfileScreen({ ui, state, dispatch }) {
           </View>
         </SettingRow>
       </View>
+
+      {canInstall && (
+        <>
+          <SecHead s={s}>APP</SecHead>
+          <Pressable style={s.btnPrimary} onPress={ui.openInstall}><Text style={s.btnPrimaryTxt}>Install to home screen</Text></Pressable>
+          <Text style={[s.muted, { marginTop: 10, lineHeight: 18 }]}>Runs fullscreen with no Safari bars, and fully offline. Recommended.</Text>
+        </>
+      )}
 
       <SecHead s={s}>DATA</SecHead>
       <Pressable style={s.btnGhost} onPress={exportData}><Text style={s.btnGhostTxt}>Export backup (JSON)</Text></Pressable>

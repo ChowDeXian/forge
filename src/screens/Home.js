@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { SecHead, Pill } from '../components';
+import { Play } from 'lucide-react-native';
 import { routineById } from '../store';
 import { currentStreak, weeklyVolume, workoutVolume, fmtVolume, fmtDurationShort, relativeDay } from '../calc';
 import { todayKey } from './Workout';
@@ -39,7 +40,7 @@ export default function HomeScreen({ ui, state, startWorkout, setTab }) {
           <Text style={[s.eyebrow, { color: t.accent }]}>IN PROGRESS</Text>
           <Text style={[s.h2, { marginTop: 8 }]}>{state.activeSession.title}</Text>
           <Text style={[s.muted, { marginTop: 4 }]}>Tap to resume your workout</Text>
-          <View style={s.play}><Text style={{ color: t.onAccent, fontSize: 18 }}>▶</Text></View>
+          <View style={s.play}><Play size={20} color={t.onAccent} fill={t.onAccent} strokeWidth={2} /></View>
         </Pressable>
       ) : todayRoutine ? (
         <Pressable style={[s.card, s.hero, { marginTop: streak > 0 ? 0 : 16 }]} onPress={() => startWorkout(todayRoutine)}>
@@ -52,14 +53,14 @@ export default function HomeScreen({ ui, state, startWorkout, setTab }) {
             <Pill s={s}>{todayRoutine.items.length} exercises</Pill>
             <Pill s={s} accent t={t}>{todayRoutine.items.reduce((a, i) => a + i.sets.length, 0)} sets</Pill>
           </View>
-          <View style={s.play}><Text style={{ color: t.onAccent, fontSize: 18 }}>▶</Text></View>
+          <View style={s.play}><Play size={20} color={t.onAccent} fill={t.onAccent} strokeWidth={2} /></View>
         </Pressable>
       ) : (
         <Pressable style={[s.card, s.hero, { marginTop: streak > 0 ? 0 : 16 }]} onPress={() => startWorkout(null)}>
           <Text style={[s.eyebrow, { color: t.accent }]}>TODAY</Text>
           <Text style={[s.h2, { marginTop: 8 }]}>Nothing planned</Text>
           <Text style={[s.muted, { marginTop: 4 }]}>Start an empty workout, or plan your week in the Workout tab.</Text>
-          <View style={s.play}><Text style={{ color: t.onAccent, fontSize: 18 }}>▶</Text></View>
+          <View style={s.play}><Play size={20} color={t.onAccent} fill={t.onAccent} strokeWidth={2} /></View>
         </Pressable>
       )}
 

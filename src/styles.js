@@ -22,8 +22,8 @@ export function makeStyles(t, insets = { top: 0, bottom: 0, left: 0, right: 0 })
     streak: { alignSelf: 'flex-start', backgroundColor: t.accentDim, paddingVertical: 6, paddingHorizontal: 12, borderRadius: 999, marginTop: 12 },
     streakTxt: { color: t.accent, fontWeight: '700', fontSize: 13 },
 
-    card: { backgroundColor: t.surface, borderWidth: 1, borderColor: t.line, borderRadius: 18, padding: 18, marginBottom: 12 },
-    hero: { borderColor: t.accent + '55' },
+    card: { backgroundColor: t.surface, borderWidth: 1, borderColor: t.line, borderRadius: 20, padding: 18, marginBottom: 12 },
+    hero: { borderColor: t.accent + '55', shadowColor: t.accent, shadowOpacity: 0.12, shadowRadius: 20, shadowOffset: { width: 0, height: 6 } },
 
     pillRow: { flexDirection: 'row', gap: 8, marginTop: 14 },
     pill: { backgroundColor: t.surface2, borderWidth: 1, borderColor: t.line, paddingVertical: 5, paddingHorizontal: 11, borderRadius: 999 },
@@ -35,8 +35,8 @@ export function makeStyles(t, insets = { top: 0, bottom: 0, left: 0, right: 0 })
     bar: { width: '70%', maxWidth: 26, borderRadius: 7, backgroundColor: t.surface3 },
     barLabel: { fontSize: 11, color: t.muted, fontWeight: '600', marginTop: 8 },
 
-    btnPrimary: { backgroundColor: t.accent, borderRadius: 14, padding: 16, alignItems: 'center' },
-    btnPrimaryTxt: { color: t.onAccent, fontWeight: '700', fontSize: 15.5 },
+    btnPrimary: { backgroundColor: t.accent, borderRadius: 14, padding: 16, alignItems: 'center', shadowColor: t.accent, shadowOpacity: 0.35, shadowRadius: 14, shadowOffset: { width: 0, height: 4 } },
+    btnPrimaryTxt: { color: t.onAccent, fontWeight: '800', fontSize: 15.5, letterSpacing: 0.2 },
     btnGhost: { backgroundColor: t.surface2, borderWidth: 1, borderColor: t.line, borderRadius: 14, padding: 16, alignItems: 'center' },
     btnGhostTxt: { color: t.text, fontWeight: '700', fontSize: 15.5 },
     btnDanger: { backgroundColor: t.surface2, borderWidth: 1, borderColor: t.danger + '55', borderRadius: 14, padding: 16, alignItems: 'center' },
@@ -49,10 +49,17 @@ export function makeStyles(t, insets = { top: 0, bottom: 0, left: 0, right: 0 })
     rowEnd: { fontFamily: MONO, color: t.muted, fontWeight: '700', fontSize: 13 },
 
     // nav sits lower on the screen: extra 20px below the labels clears the Safari bookmark bar
-    nav: { flexDirection: 'row', backgroundColor: t.surface, borderTopWidth: 1, borderTopColor: t.line, paddingTop: 8, paddingBottom: Math.max(insets.bottom - 10, 8) + 20 },
-    navItem: { flex: 1, alignItems: 'center', gap: 3 },
-    navIcon: { fontSize: 20, color: t.muted },
-    navLabel: { fontSize: 10.5, fontWeight: '600', color: t.muted },
+    // floating pill nav: detached bar with a lime pill behind the active tab
+    nav: {
+      flexDirection: 'row', gap: 4,
+      backgroundColor: t.surface, borderWidth: 1, borderColor: t.line, borderRadius: 24,
+      marginHorizontal: 14, marginTop: 6, marginBottom: insets.bottom + 8,
+      paddingVertical: 7, paddingHorizontal: 7,
+      shadowColor: '#000', shadowOpacity: 0.35, shadowRadius: 16, shadowOffset: { width: 0, height: 6 },
+    },
+    navItem: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 3, paddingVertical: 7, borderRadius: 16 },
+    navItemActive: { backgroundColor: t.accent },
+    navLabel: { fontSize: 10, fontWeight: '700', color: t.muted, letterSpacing: 0.2 },
 
     /* resume bar (active session minimised) */
     resumeBar: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: t.accent, paddingVertical: 12, paddingHorizontal: 18 },
@@ -62,6 +69,7 @@ export function makeStyles(t, insets = { top: 0, bottom: 0, left: 0, right: 0 })
     /* logger */
     overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: t.bg },
     loggerHead: { paddingHorizontal: 20, paddingTop: 10 + insets.top, paddingBottom: 8 },
+    backRow: { flexDirection: 'row', alignItems: 'center', gap: 2, alignSelf: 'flex-start', paddingVertical: 4, paddingRight: 10 },
     back: { color: t.text, fontWeight: '600', fontSize: 15 },
     bigTimer: { fontFamily: MONO, fontSize: 20, fontWeight: '700', color: t.text },
     restPill: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: t.accentDim, borderWidth: 1, borderColor: t.accent + '55', paddingVertical: 9, paddingHorizontal: 14, borderRadius: 999, marginTop: 12 },
@@ -133,5 +141,6 @@ export function makeStyles(t, insets = { top: 0, bottom: 0, left: 0, right: 0 })
     toastTxt: { color: t.onAccent, fontWeight: '700', fontSize: 13.5 },
     confirmBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center', padding: 28 },
     confirmCard: { backgroundColor: t.surface, borderWidth: 1, borderColor: t.line, borderRadius: 20, padding: 22, width: '100%', maxWidth: 420 },
+    installStep: { width: 40, height: 40, borderRadius: 12, backgroundColor: t.accentDim, alignItems: 'center', justifyContent: 'center' },
   });
 }

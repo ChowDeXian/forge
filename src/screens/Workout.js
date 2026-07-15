@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, Modal } from 'react-native';
 import { SecHead } from '../components';
 import { routineById } from '../store';
 import ExercisePicker, { metricLabel } from './ExercisePicker';
+import { Play } from 'lucide-react-native';
 
 export const DAYS = [['mon', 'Mon'], ['tue', 'Tue'], ['wed', 'Wed'], ['thu', 'Thu'], ['fri', 'Fri'], ['sat', 'Sat'], ['sun', 'Sun']];
 export const todayKey = () => DAYS[(new Date().getDay() + 6) % 7][0];
@@ -35,8 +36,9 @@ export default function WorkoutScreen({ ui, state, dispatch, startWorkout }) {
               <Text style={s.h2}>{r.name}</Text>
               <Text style={s.rowSub}>{r.items.length} exercises · {nSets} sets</Text>
             </View>
-            <Pressable style={[s.pill, { backgroundColor: t.accent, borderColor: t.accent }]} onPress={() => startWorkout(r)}>
-              <Text style={{ color: t.onAccent, fontWeight: '700', fontSize: 12 }}>▶ Start</Text>
+            <Pressable style={[s.pill, { backgroundColor: t.accent, borderColor: t.accent, flexDirection: 'row', alignItems: 'center', gap: 4 }]} onPress={() => startWorkout(r)}>
+              <Play size={12} color={t.onAccent} fill={t.onAccent} strokeWidth={2} />
+              <Text style={{ color: t.onAccent, fontWeight: '700', fontSize: 12 }}>Start</Text>
             </Pressable>
           </Pressable>
         );

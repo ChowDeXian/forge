@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
 import { SecHead } from '../components';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { exerciseById } from '../store';
 import {
   dayKey, longestStreak, workoutVolume, fmtVolume, fmtDurationShort, fmtWeight, fmtValue,
@@ -81,9 +82,9 @@ export default function HistoryScreen({ ui, state }) {
 
           <View style={s.card}>
             <View style={[s.rowBetween, { marginBottom: 10 }]}>
-              <Pressable style={s.calNavBtn} onPress={() => shiftMonth(-1)}><Text style={s.iconBtnTxt}>‹</Text></Pressable>
+              <Pressable style={s.calNavBtn} onPress={() => shiftMonth(-1)}><ChevronLeft size={18} color={t.text} strokeWidth={2.4} /></Pressable>
               <Text style={s.h2}>{monthLabel}</Text>
-              <Pressable style={s.calNavBtn} onPress={() => shiftMonth(+1)}><Text style={s.iconBtnTxt}>›</Text></Pressable>
+              <Pressable style={s.calNavBtn} onPress={() => shiftMonth(+1)}><ChevronRight size={18} color={t.text} strokeWidth={2.4} /></Pressable>
             </View>
             <View style={s.calGrid}>
               {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => <Text key={'h' + i} style={s.calDow}>{d}</Text>)}

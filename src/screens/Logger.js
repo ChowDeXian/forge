@@ -1,6 +1,7 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { View, Text, ScrollView, Pressable, TextInput } from 'react-native';
-import { DragMeter } from '../components';
+import { DragMeter, BackButton } from '../components';
+import { Repeat, X } from 'lucide-react-native';
 import { exerciseById } from '../store';
 import {
   uid, fmtDuration, kgToDisplay, displayToKg, roundDisplay, weightStepKg, valueStep,
@@ -117,7 +118,7 @@ export default function Logger({ ui, state, dispatch }) {
       <View style={{ flex: 1 }}>
         <View style={s.loggerHead}>
           <View style={s.rowBetween}>
-            <Pressable onPress={close}><Text style={s.back}>‹ Minimise</Text></Pressable>
+            <BackButton s={s} t={t} label="Minimise" onPress={close} />
             <Text style={s.bigTimer}>{fmtDuration(elapsed)}</Text>
           </View>
           {restLeft > 0 && (
@@ -154,8 +155,8 @@ export default function Logger({ ui, state, dispatch }) {
                 <View style={s.rowBetween}>
                   <Text style={[s.exName, { flexShrink: 1 }]}>{ex ? ex.name : 'Unknown exercise'}</Text>
                   <View style={{ flexDirection: 'row', gap: 6 }}>
-                    <Pressable style={s.iconBtn} onPress={() => setPicker({ superset: ei })}><Text style={[s.iconBtnTxt, { color: t.accent }]}>⇄</Text></Pressable>
-                    <Pressable style={s.iconBtn} onPress={() => removeExercise(ei)}><Text style={s.iconBtnTxt}>✕</Text></Pressable>
+                    <Pressable style={s.iconBtn} onPress={() => setPicker({ superset: ei })}><Repeat size={15} color={t.accent} strokeWidth={2.4} /></Pressable>
+                    <Pressable style={s.iconBtn} onPress={() => removeExercise(ei)}><X size={15} color={t.muted} strokeWidth={2.4} /></Pressable>
                   </View>
                 </View>
                 <Text style={[s.muted, { marginBottom: 12 }]}>

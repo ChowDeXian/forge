@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView, Pressable } from 'react-native';
-import { SecHead } from '../components';
+import { SecHead, BackButton } from '../components';
 import { exerciseById } from '../store';
 import { workoutVolume, fmtVolume, fmtDurationShort, fmtSet, bestSetOf } from '../calc';
 
@@ -24,7 +24,7 @@ export default function WorkoutDetail({ ui, state, dispatch, workoutId, onClose 
     <View style={s.overlay}>
       <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={s.overlayScreen}>
-          <Pressable onPress={onClose}><Text style={s.back}>‹ Back</Text></Pressable>
+          <BackButton s={s} t={t} onPress={onClose} />
           <Text style={s.h1}>{w.title}</Text>
           <Text style={[s.muted, { marginBottom: 16 }]}>
             {date.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })} · {date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
