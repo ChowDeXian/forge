@@ -83,7 +83,22 @@
           hadController = true;
         });
       }
+      // Watchdog: if the app ever fails to mount (blank screen from a bad
+      // cache/bundle state), reload once to recover. Guarded so it can't loop.
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          var root = document.getElementById('root');
+          if (root && root.childElementCount === 0) {
+            if (!sessionStorage.getItem('forge-blank-reload')) {
+              sessionStorage.setItem('forge-blank-reload', '1');
+              location.reload();
+            }
+          } else {
+            sessionStorage.removeItem('forge-blank-reload');
+          }
+        }, 6000);
+      });
     </script>
-  <script src="/forge/_expo/static/js/web/AppEntry-771fa933f946e6872eb919adcc75abb7.js" defer></script>
+  <script src="/forge/_expo/static/js/web/AppEntry-4c823269e4f20c509c9cf5c01739cb99.js" defer></script>
 </body>
 </html>
