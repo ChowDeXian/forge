@@ -53,7 +53,7 @@ export function makeStyles(t, insets = { top: 0, bottom: 0, left: 0, right: 0 })
     nav: {
       flexDirection: 'row', gap: 4,
       backgroundColor: t.surface, borderWidth: 1, borderColor: t.line, borderRadius: 24,
-      marginHorizontal: 14, marginTop: 6, marginBottom: insets.bottom + 8,
+      marginHorizontal: 14, marginTop: 6, marginBottom: Math.max(insets.bottom + 8 - 30, 2),
       paddingVertical: 7, paddingHorizontal: 7,
       shadowColor: '#000', shadowOpacity: 0.35, shadowRadius: 16, shadowOffset: { width: 0, height: 6 },
     },

@@ -8,8 +8,10 @@ import {
   oneRmSeries, trainedExerciseIds, personalRecords, relativeDay,
 } from '../calc';
 
+// primary value = what was actually lifted; the Epley projection is labelled
+// as an estimate (users read an unlabelled 1RM as "my heaviest lift")
 const prParts = (p, unit) => {
-  if (p.bestOneRm) return { sub: `Heaviest set · ${fmtWeight(p.heaviest.w, unit)} × ${p.heaviest.v}`, end: fmtWeight(p.bestOneRm.val, unit) };
+  if (p.bestOneRm) return { sub: `Est. 1RM ≈ ${fmtWeight(p.bestOneRm.val, unit)} (projected)`, end: `${fmtWeight(p.heaviest.w, unit)} × ${p.heaviest.v}` };
   if (p.mostReps) return { sub: 'Most reps in a set', end: `${p.mostReps.v} reps` };
   if (p.longest) return { sub: p.weighted && p.longest.w > 0 ? `Longest hold · ${fmtWeight(p.longest.w, unit)}` : 'Longest hold', end: fmtValue('time', p.longest.v) };
   if (p.farthest) return { sub: p.weighted && p.farthest.w > 0 ? `Farthest · ${fmtWeight(p.farthest.w, unit)}` : 'Farthest', end: fmtValue('distance', p.farthest.v) };
@@ -149,6 +151,9 @@ export default function HistoryScreen({ ui, state }) {
                     </View>
                   </>
                 )}
+                <Pressable onPress={() => ui.open({ type: 'exerciseProgress', exerciseId: chartExId })} hitSlop={8}>
+                  <Text style={{ color: t.accent, fontWeight: '700', fontSize: 13, textAlign: 'center', marginTop: 12 }}>View full progress ›</Text>
+                </Pressable>
               </View>
             </>
           )}
@@ -171,14 +176,14 @@ export default function HistoryScreen({ ui, state }) {
             if (!ex) return null;
             const { sub, end } = prParts(p, unit);
             return (
-              <View key={p.exerciseId} style={[s.card, s.listRow]}>
+              <Pressable key={p.exerciseId} style={[s.card, s.listRow]} onPress={() => ui.open({ type: 'exerciseProgress', exerciseId: p.exerciseId })}>
                 <View style={s.ic}><Text style={{ fontSize: 18 }}>🏆</Text></View>
                 <View style={{ flex: 1 }}>
                   <Text style={s.rowTitle}>{ex.name}</Text>
                   <Text style={s.rowSub}>{sub}</Text>
                 </View>
                 <Text style={[s.rowEnd, { color: t.accent }]}>{end}</Text>
-              </View>
+              </Pressable>
             );
           })}
         </>

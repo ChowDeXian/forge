@@ -20,6 +20,7 @@ import Logger from './src/screens/Logger';
 import RoutineEditor from './src/screens/RoutineEditor';
 import CreateExercise from './src/screens/CreateExercise';
 import WorkoutDetail from './src/screens/WorkoutDetail';
+import ExerciseProgress from './src/screens/ExerciseProgress';
 import VelocityScreen from './src/screens/Velocity';
 import InstallPrompt from './src/screens/InstallPrompt';
 import { House, Dumbbell, Gauge, ChartColumn, User, Play } from 'lucide-react-native';
@@ -203,6 +204,9 @@ function Root() {
       )}
       {overlay?.type === 'workoutDetail' && (
         <WorkoutDetail ui={ui} state={state} dispatch={dispatch} workoutId={overlay.workoutId} onClose={() => setOverlay(null)} />
+      )}
+      {overlay?.type === 'exerciseProgress' && (
+        <ExerciseProgress ui={ui} state={state} exerciseId={overlay.exerciseId} onClose={() => setOverlay(null)} />
       )}
 
       {/* Demo video player */}

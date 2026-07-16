@@ -210,6 +210,32 @@ export function personalRecords(workouts) {
 
 export const totalVolume = (workouts) => workouts.reduce((a, w) => a + workoutVolume(w), 0);
 
+/** Chronological per-session summaries for one exercise, honoring the entry
+    metric: { when, workoutId, metric, weighted, sets, top:{w,v}, e1rm?, volume? } */
+export function exerciseSessions(workouts, exerciseId) {
+  return [...workouts]
+    .sort((a, b) => a.startedAt - b.startedAt)
+    .map((w) => {
+      const entry = w.entries.find((e) => e.exerciseId === exerciseId);
+      if (!entry) return null;
+      const done = entry.sets.filter((s) => s.done && s.v > 0);
+      if (!done.length) return null;
+      const metric = entry.metric || 'reps';
+      const weighted = entry.weighted !== undefined ? entry.weighted : true;
+      const best = bestSetOf(entry);
+      const session = {
+        when: w.startedAt, workoutId: w.id, metric, weighted,
+        sets: done.length, top: { w: best.w, v: best.v },
+      };
+      if (metric === 'reps' && weighted) {
+        session.e1rm = Math.max(...done.map((s) => epley(s.w, s.v)));
+        session.volume = done.reduce((a, s) => a + s.w * s.v, 0);
+      }
+      return session;
+    })
+    .filter(Boolean);
+}
+
 export const relativeDay = (ts, now = Date.now()) => {
   const today = dayKey(now), that = dayKey(ts);
   if (that === today) return 'Today';
